@@ -1,5 +1,27 @@
 ;;; init.el --- user-init-file                    -*- lexical-binding: t -*-
 ;;; Early birds
+
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
+(progn ;     init optimization
+  (defvar file-name-handler-alist-old file-name-handler-alist)
+  
+  (setq file-name-handler-alist nil
+        gc-cons-threshold 402653184
+        gc-cons-percentage 0.6)
+
+  (add-hook 'after-init-hook
+            `(lambda ()
+               (setq file-name-handler-alist file-name-handler-alist-old
+                     gc-cons-threshold 800000
+                     gc-cons-percentage 0.1)
+               (garbage-collect)) t))
+
 (progn ;     startup
   (defvar before-user-init-time (current-time)
     "Value of `current-time' when Emacs begins loading `user-init-file'.")
@@ -10,16 +32,12 @@
   (setq user-emacs-directory (file-name-directory user-init-file))
   (message "Loading %s..." user-init-file)
   (setq package-enable-at-startup nil)
-  ;; (package-initialize)
   (setq inhibit-startup-buffer-menu t)
   (setq inhibit-startup-screen t)
   (setq inhibit-startup-echo-area-message "locutus")
   (setq initial-buffer-choice t)
   (setq initial-scratch-message "")
-  (setq load-prefer-newer t)
-  (scroll-bar-mode 0)
-  (tool-bar-mode 0)
-  (menu-bar-mode 0))
+  (setq load-prefer-newer t))
 
 (progn ;    `borg'
   (add-to-list 'load-path (expand-file-name "lib/borg" user-emacs-directory))
@@ -27,8 +45,10 @@
   (borg-initialize))
 
 (progn ;    `use-package'
-  (require  'use-package)
-  (setq use-package-verbose t))
+  (setq use-package-verbose nil
+        use-package-compute-statistics nil
+        use-package-enable-imenu-support t)
+  (require  'use-package))
 
 (use-package auto-compile
   :demand t
@@ -51,12 +71,16 @@
 (use-package custom
   :no-require t
   :config
-  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+  (setq custom-file (expand-file-name "var/custom.el" user-emacs-directory))
   (when (file-exists-p custom-file)
     (load custom-file)))
 
-(use-package server
-  :config (or (server-running-p) (server-mode)))
+(use-package no-littering
+  :config
+  (setq backup-directory-alist
+        `((".*" . ,(no-littering-expand-var-file-name "backup/"))))
+  (setq auto-save-file-name-transforms
+        `((".*" ,(no-littering-expand-var-file-name "auto-save/") t))))
 
 (progn ;     startup
   (message "Loading early birds...done (%.3fs)"
@@ -64,86 +88,6 @@
                                       before-user-init-time))))
 
 ;;; Long tail
-
-(use-package dash
-  :config (dash-enable-font-lock))
-
-(use-package diff-hl
-  :config
-  (setq diff-hl-draw-borders nil)
-  (global-diff-hl-mode)
-  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh t))
-
-(use-package dired
-  :defer t
-  :config (setq dired-listing-switches "-alh"))
-
-(use-package eldoc
-  :when (version< "25" emacs-version)
-  :config (global-eldoc-mode))
-
-(use-package help
-  :defer t
-  :config (temp-buffer-resize-mode))
-
-(progn ;    `isearch'
-  (setq isearch-allow-scroll t))
-
-(use-package lisp-mode
-  :config
-  (add-hook 'emacs-lisp-mode-hook 'outline-minor-mode)
-  (add-hook 'emacs-lisp-mode-hook 'reveal-mode)
-  (defun indent-spaces-mode ()
-    (setq indent-tabs-mode nil))
-  (add-hook 'lisp-interaction-mode-hook #'indent-spaces-mode))
-
-(use-package magit
-  :defer t
-  :bind (("C-x g"   . magit-status)
-         ("C-x M-g" . magit-dispatch-popup))
-  :config
-  (magit-add-section-hook 'magit-status-sections-hook
-                          'magit-insert-modules
-                          'magit-insert-stashes
-                          'append))
-
-(use-package man
-  :defer t
-  :config (setq Man-width 80))
-
-(use-package paren
-  :config (show-paren-mode))
-
-(use-package prog-mode
-  :config (global-prettify-symbols-mode)
-  (defun indicate-buffer-boundaries-left ()
-    (setq indicate-buffer-boundaries 'left))
-  (add-hook 'prog-mode-hook #'indicate-buffer-boundaries-left))
-
-(use-package recentf
-  :demand t
-  :config (add-to-list 'recentf-exclude "^/\\(?:ssh\\|su\\|sudo\\)?:"))
-
-(use-package savehist
-  :config (savehist-mode))
-
-(use-package saveplace
-  :when (version< "25" emacs-version)
-  :config (save-place-mode))
-
-(use-package simple
-  :config (column-number-mode))
-
-(progn ;    `text-mode'
-  (add-hook 'text-mode-hook #'indicate-buffer-boundaries-left))
-
-(use-package tramp
-  :defer t
-  :config
-  (add-to-list 'tramp-default-proxies-alist '(nil "\\`root\\'" "/ssh:%h:"))
-  (add-to-list 'tramp-default-proxies-alist '("localhost" nil nil))
-  (add-to-list 'tramp-default-proxies-alist
-               (list (regexp-quote (system-name)) nil nil)))
 
 (progn ;     startup
   (message "Loading %s...done (%.3fs)" user-init-file
@@ -158,10 +102,23 @@
             t))
 
 (progn ;     personalize
-  (let ((file (expand-file-name (concat (user-real-login-name) ".el")
-                                user-emacs-directory)))
-    (when (file-exists-p file)
-      (load file))))
+  (defvar kalle-before-first-cmd-hook '())
+  (defun kalle/run-before-first-cmd-hook ()
+    (run-hooks 'kalle-before-first-cmd-hook)
+    (remove-hook 'pre-command-hook 'kalle/run-before-first-cmd-hook))
+  (add-hook 'pre-command-hook 'kalle/run-before-first-cmd-hook)
+    
+  (let ((org-file (expand-file-name "settings.org" user-emacs-directory))
+        (settings (expand-file-name "var/tangled/settings.el" user-emacs-directory)))
+    (when (file-newer-than-file-p org-file settings)
+      (require 'org)
+      (unless (file-directory-p (file-name-directory settings))
+              (make-directory (file-name-directory settings) t))
+      (org-babel-tangle-file org-file settings))
+    (load settings)
+    (message "Loading %s...done (%.3fs)" settings
+           (float-time (time-subtract (current-time)
+                                      before-user-init-time)))))
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

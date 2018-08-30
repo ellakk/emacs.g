@@ -1,0 +1,940 @@
+* Emacs Settings
+
+** Editor
+
+#+BEGIN_SRC emacs-lisp
+;; Only use utf-8
+(set-language-environment 'utf-8)
+(setq locale-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-selection-coding-system (if (eq system-type 'windows-nt) 'utf-16-le 'utf-8))
+(prefer-coding-system 'utf-8)
+
+;; Enable some disabled commands
+(put 'narrow-to-region 'disabled nil)
+(put 'upcase-region 'disabled nil)
+(put 'downcase-region 'disabled nil)
+(put 'erase-buffer 'disabled nil)
+(put 'scroll-left 'disabled nil)
+(put 'dired-find-alternate-file 'disabled nil)
+
+;; Enable y/n answers
+(fset 'yes-or-no-p 'y-or-n-p)
+
+(setq-default
+ hscroll-margin 2                        ; Smooth Scrolling
+ hscroll-step 1                          ; ^
+ scroll-conservatively 1001              ; ^
+ scroll-margin 0                         ; ^
+ scroll-preserve-screen-position t       ; ^
+ comint-prompt-read-only t               ; Undeletable prompt
+ enable-recursive-minibuffers t          ; Enable recursive minibuffers
+ history-length 1000                     ; Keep a longer history list
+ save-interprogram-paste-before-kill t   ; Save each kill to clipboard
+ create-lockfiles nil)                   ; Dont create lockfiles
+#+END_SRC
+
+** Editing
+
+#+BEGIN_SRC emacs-lisp
+(setq-default
+ require-final-newline t                ; All files get a final newline
+ sentence-end-double-space nil          ; Double space does not end sentences
+ indent-tabs-mode nil                   ; New tabs are forbidden
+ tab-width 4                            ; Tab appearance
+ fill-column 80                         ; Maximum line width
+ set-mark-command-repeat-pop t)         ; C-SPC pops mark after C-u C-SPC
+#+END_SRC
+
+** Visual
+
+#+BEGIN_SRC emacs-lisp
+(setq-default
+ echo-keystrokes 0.02                   ; Echo keystrokes faster
+ frame-title-format "%b (%f)"           ; Filename in frame title
+ image-animate-loop t                   ; Loop images forever
+ inhibit-startup-message t              ; Dont show startup message
+ blink-matching-paren nil               ; Dont blink when creating matching parens
+ mode-line-default-help-echo nil        ; Disable mode-line mouseovers
+ ring-bell-function #'ignore            ; Disable the bell
+ use-dialog-box nil                     ; Only use minibuffer for prompts
+ truncate-lines t                       ; Do not display continuation lines
+ )
+
+;; Disable some bars
+(menu-bar-mode -1)
+(tooltip-mode -1)
+(when (display-graphic-p)
+  (scroll-bar-mode -1)
+  (tool-bar-mode -1))
+
+;; Enable column number in modeline
+(column-number-mode +1)
+#+END_SRC
+
+* Functions
+
+** Buffers
+
+#+BEGIN_SRC emacs-lisp
+(defun kalle/kill-buffer-maby-window (&optional arg)
+  "Kill buffers and if universal arg is 4 then also kill the current window.
+If the univeral arg is 16 then only kill the window."
+  (interactive "P")
+  (when (or (equal '(4) arg) (equal nil arg))
+    (call-interactively 'kill-this-buffer))
+  (when (or (equal '(4) arg) (equal '(16) arg))
+    (delete-window)))
+#+END_SRC
+
+** Editing
+
+#+BEGIN_SRC emacs-lisp
+(defun kalle/4-next-lines ()
+  "Move 4 lines down."
+  (interactive)
+  (next-line '4))
+
+(defun kalle/4-previous-lines ()
+  "Move 4 lines down."
+  (interactive)
+  (previous-line '4))
+#+END_SRC
+
+** Files
+
+** Misc
+
+** Windows
+
+#+BEGIN_SRC emacs-lisp
+(defun kalle/delete-window-maby-buffer (&optional arg)
+  "Delete the current window. If the universal prefix argument is
+used then kill the buffer too."
+  (interactive "P")
+  (if (equal '(4) arg)
+      (kill-buffer-and-window)
+    (delete-window)))
+#+END_SRC
+
+* Keybindings
+
+** Normal
+
+#+BEGIN_SRC emacs-lisp
+(bind-keys
+ ("M-n" . kalle/4-next-lines)
+ ("M-p" . kalle/4-previous-lines)
+ ("M-SPC" . cycle-spacing)
+ ("M-o" . other-window))
+
+(bind-keys*
+ ("M-k" . kalle/kill-buffer-maby-window)
+ ("M-u" . universal-argument)
+ :map universal-argument-map
+ ("M-u" . universal-argument-more))
+#+END_SRC
+
+** Leader
+
+#+BEGIN_SRC emacs-lisp
+(bind-key "M-m" nil)
+
+(bind-keys
+ ;; Top-level
+ :prefix-map kalle-map
+ :prefix "M-m"
+ 
+ ;; (B)uffers
+ ("bd" . kalle/kill-buffer-maby-window)
+
+  ;; (Q)uit
+ ("qf" . delete-frame)
+ ("qq" . save-buffers-kill-terminal)
+
+ ;; (S)earch
+ 
+ ;; (W)indows
+ ("wd" . kalle/delete-window-maby-buffer)
+ ("wm" . delete-other-windows)
+ ("ws" . split-window-below)
+ ("wv" . split-window-horizontally)
+ ("ww" . other-window)
+
+ ;; Te(X)t
+ ("x aa" . align)
+ ("x ar" . align-regexp)
+ ("x ld" . delete-duplicate-lines)
+ ("x lk" . keep-lines)
+ ("x lm" . delete-matching-lines)
+ ("x ln" . delete-non-matching-lines)
+ ("x ls" . sort-lines)
+ )
+
+(global-set-key (kbd "M-m r") ctl-x-r-map)
+(global-set-key (kbd "M-m h") help-map)
+(global-set-key (kbd "M-m n") narrow-map)
+
+(define-key key-translation-map (kbd "M-m f s") (kbd "C-x C-s"))
+(define-key key-translation-map (kbd "M-m f S") (kbd "C-x s"))
+(define-key key-translation-map (kbd "M-m b r") (kbd "C-x C-q"))
+#+END_SRC
+
+* Packages
+
+** Completion
+
+*** company
+
+#+BEGIN_SRC emacs-lisp
+(use-package company
+  :defer 1
+  :bind
+  ((:map company-active-map)
+   ("C-j" . company-complete-selection))
+  :init
+  (setq company-minimum-prefix-length 2
+        company-dabbrev-ignore-case nil
+        company-dabbrev-downcase nil
+        company-idle-delay 0.2)
+  :config
+  (global-company-mode)
+  (company-tng-configure-default))
+#+END_SRC
+
+*** company-statistics
+
+#+BEGIN_SRC emacs-lisp
+(use-package company-statistics
+  :hook (company-mode . +company-statistics/start)
+  :preface
+  (defun +company-statistics/start ()
+    (let ((inhibit-message t))
+      (company-statistics-mode))))
+#+END_SRC
+
+*** counsel
+
+#+BEGIN_SRC emacs-lisp
+(use-package counsel
+  :bind
+  (("M-y" . counsel-yank-pop)
+   ("M-i" . kalle/counsel-jump-in-buffer)
+   ("C-x rb" . counsel-bookmark)
+   (:map kalle-map)
+   ("M-m" . counsel-M-x)
+   ("fd" . counsel-fzf)
+   ("ff" . counsel-find-file)
+   ("fl" . counsel-locate)
+   ("fr" . counsel-recentf)
+   ("sd" . kalle/rg-current-directory)
+   ("sf" . kalle/rg-select-directory))
+  :preface
+  (defun kalle/rg-current-directory ()
+    "Search current DIR with RG"
+    (interactive)
+    (counsel-rg "" default-directory nil (concat default-directory)))
+
+  (defun kalle/rg-select-directory ()
+    "Prompt for DIR to search with RG"
+    (interactive)
+    (let ((dir (read-directory-name "Directory:")))
+      (counsel-rg "" dir nil (concat dir))))
+
+  (defun kalle/counsel-jump-in-buffer ()
+  "Jump in buffer with `counsel-imenu' or `counsel-org-goto' if in org-mode"
+  (interactive)
+  (call-interactively
+   (cond
+    ((eq major-mode 'org-mode) 'counsel-org-goto)
+    (t 'counsel-imenu))))
+  :init
+  (setq counsel-yank-pop-separator "\n----\n")
+  (define-key minibuffer-local-map (kbd "C-r")
+    'counsel-minibuffer-history))
+#+END_SRC
+
+*** hippie-exp
+
+#+BEGIN_SRC emacs-lisp
+(use-package hippie-exp
+  :bind
+  (("M-/" . hippie-expand)
+   ("M-ö" . hippie-expand))
+  :init
+  (setq-default
+   hippie-expand-try-functions-list
+   '(
+     try-expand-dabbrev
+     try-expand-dabbrev-all-buffers
+     try-expand-dabbrev-from-kill
+     try-complete-file-name-partially
+     try-complete-file-name
+     try-expand-all-abbrevs
+     try-expand-list
+     try-expand-line
+     try-complete-lisp-symbol-partially
+     try-complete-lisp-symbol)))
+#+END_SRC
+
+*** ivy
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy
+  :hook (kalle-before-first-cmd . ivy-mode)
+  :bind
+  ((:map ivy-minibuffer-map)
+   ("M-j" . ivy-avy)
+   (:map kalle-map)
+   ("bb" . ivy-switch-buffer))
+  :init
+  (setq ivy-fixed-height-minibuffer t
+        ivy-format-function #'ivy-format-function-line
+        ivy-height 15
+        ivy-initial-inputs-alist nil
+        projectile-completion-system 'ivy
+        magit-completing-read-function 'ivy-completing-read
+        ivy-magic-slash-non-match-action nil
+        smex-completion-method 'ivy
+        ivy-use-ignore-default 'always
+        ivy-ignore-buffers '("\\` "
+                             "\\*Flycheck"
+                             "\\*anaconda\\*"
+                             "\\*anaconda-mode\\*"
+                             "\\*ansi-term-.\\*"
+                             "\\*bookmark list\\*"
+                             "\\*spacemacs\\*"
+                             "\\*flycheck.+\\*"
+                             "\\*google translate\\*"
+                             "\\*grep\\*"
+                             "\\*help\\*"
+                             "\\*helpful"
+                             "\\*ibuffer*"
+                             "\\*ivy-occur"
+                             "\\*MDN CSS\\*"
+                             "\\*occur\\*"
+                             "\\*shell-"
+                             "magit: "
+                             "magit-process: "
+                             "magit-diff: "
+                             "magit-revision: "))
+  :config
+  (define-key ivy-minibuffer-map (kbd "C-l") (kbd "DEL")))
+#+END_SRC
+
+*** ivy-rich
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy-rich
+  :after ivy
+  :config
+  (ivy-rich-mode))
+#+END_SRC
+
+*** ivy-yasnippet
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy-yasnippet
+  :bind
+  ((:map kalle-map)
+   ("is" . ivy-yasnippet))
+  :init
+  (setq ivy-yasnippet-expand-keys nil))
+#+END_SRC
+
+*** smex
+
+#+BEGIN_SRC emacs-lisp
+(use-package smex
+  :commands (smex smex-major-mode-commands)
+  :config
+  (smex-initialize))
+#+END_SRC
+
+*** yasnippet
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet
+  :commands (yas-hippie-try-expand)
+  :init
+  (setq yas-verbosity 0
+        yas-also-auto-indent-first-line t
+        yas-prompt-functions '(yas-completing-prompt yas-ido-prompt yas-no-prompt)
+        yas-minor-mode-map nil)
+  (push 'yas-hippie-try-expand hippie-expand-try-functions-list)
+  :config
+  (yas-global-mode 1))
+#+END_SRC
+
+*** yasnippet-snippets
+
+#+BEGIN_SRC emacs-lisp
+(use-package yasnippet-snippets
+  :after yasnippet)
+#+END_SRC
+
+** Files/History/Bookmarks
+
+*** autorevert
+
+#+BEGIN_SRC emacs-lisp
+(use-package autorevert
+  :hook ((find-file dired-mode) . global-auto-revert-mode)
+  :init
+  (setq-default
+   global-auto-revert-non-file-buffers t
+   auto-revert-verbose nil))
+#+END_SRC
+
+*** dired
+
+#+BEGIN_SRC emacs-lisp
+(use-package dired
+  :defer t
+  :init
+  (setq-default
+   dired-recursive-deletes 'always
+   dired-recursive-copies 'always
+   dired-dwim-target t
+   dired-listing-switches "-aBhl  --group-directories-first"))
+#+END_SRC
+
+*** dired+
+
+#+BEGIN_SRC emacs-lisp
+(use-package dired+
+  :hook (dired-mode . kalle/load-dired+)
+  :preface
+  (defun kalle/load-dired+ ()
+    (require 'dired+))
+  :init
+  (setq diredp-hide-details-initially-flag nil
+        font-lock-maximum-decoration (quote ((dired-mode . 1) (t . t))))
+  :config
+  (toggle-diredp-find-file-reuse-dir t)
+  (global-dired-hide-details-mode 1))
+#+END_SRC
+
+*** dired-x
+
+#+BEGIN_SRC emacs-lisp
+(use-package dired-x
+  :hook (dired-mode . kalle/load-dired-x)
+  :bind
+  ((:map kalle-map)
+   ("f J" . dired-jump-other-window)
+   ("f j" . dired-jump))
+  :preface
+  (defun kalle/load-dired-x ()
+    (require 'dired-x)))
+#+END_SRC
+
+*** ediff
+
+#+BEGIN_SRC emacs-lisp
+(use-package ediff
+  :defer t
+  :init
+  (setq-default
+   ediff-split-window-function 'split-window-horizontally
+   ediff-window-setup-function 'ediff-setup-windows-plain))
+#+END_SRC
+
+*** recentf
+
+#+BEGIN_SRC emacs-lisp
+(use-package recentf
+  :hook (find-file . kalle/recentf)
+  :preface
+  (defun kalle/recentf ()
+    (unless recentf-mode
+      (let ((inhibit-message t))
+        (recentf-mode)
+        (recentf-track-opened-file))))
+  :init
+  (setq-default recentf-max-saved-items 500
+                recentf-auto-cleanup 'never)
+  :config
+  (add-to-list 'recentf-exclude no-littering-var-directory)
+  (add-to-list 'recentf-exclude no-littering-etc-directory)
+  (add-hook 'kill-emacs-hook #'recentf-cleanup))
+#+END_SRC
+
+*** savehist
+
+#+BEGIN_SRC emacs-lisp
+(use-package savehist
+  :hook (kalle-before-first-cmd . savehist-mode)
+  :init
+  (setq-default
+   savehist-additional-variables '(search-ring regexp-search-ring extended-command-history)
+   savehist-autosave-interval 60))
+#+END_SRC
+
+*** saveplace
+
+#+BEGIN_SRC emacs-lisp
+(use-package saveplace
+  :config
+  (save-place-mode))
+#+END_SRC
+
+*** treemacs
+
+#+BEGIN_SRC emacs-lisp
+(use-package treemacs
+  :bind
+  ((:map kalle-map)
+   ("f t" . treemacs)
+   ("p t" . treemacs-projectile))
+  :preface
+  (defvar treemacs-use-collapsed-directories (if (executable-find "python") 3 0))
+
+  (defvar treemacs-use-git-mode
+    (pcase (cons (not (null (executable-find "git")))
+                 (not (null (executable-find "python3"))))
+      (`(t . t) 'extended)
+      (`(t . _) 'simple)))
+  :init
+  (setq treemacs-follow-after-init t
+        treemacs-width 35
+        treemacs-position 'left
+        treemacs-is-never-other-window nil
+        treemacs-silent-refresh nil
+        treemacs-indentation 2
+        treemacs-change-root-without-asking nil
+        treemacs-sorting 'alphabetic-desc
+        treemacs-show-hidden-files t
+        treemacs-never-persist nil
+        treemacs-goto-tag-strategy 'refetch-index
+        treemacs-collapse-dirs treemacs-use-collapsed-directories)
+  :config
+  (treemacs-follow-mode t)
+  (treemacs-filewatch-mode t))
+#+END_SRC
+
+** Help
+
+*** google-translate
+
+#+BEGIN_SRC emacs-lisp
+(use-package google-translate
+  :bind
+  ((:map kalle-map)
+   ("x t" . google-translate-smooth-translate))
+  :init
+  (setq google-translate-translation-directions-alist
+        '(("en" . "sv") ("sv" . "en") ("de" . "sv") ("fr" . "sv")))
+  :config
+  (require 'google-translate-smooth-ui))
+#+END_SRC
+
+*** helpful
+
+#+BEGIN_SRC emacs-lisp
+(use-package helpful
+  :bind 
+  ((:map kalle-map)
+   ("h ." . helpful-at-point)
+   ("h f" . helpful-callable)
+   ("h k" . helpful-key)
+   ("h v" . helpful-variable)))
+#+END_SRC
+
+*** which-key
+
+#+BEGIN_SRC emacs-lisp
+(use-package which-key
+  :defer 0.5
+  :init
+  (setq which-key-sort-order 'which-key-key-order-alpha
+        which-key-compute-remaps t)
+  :config
+  (which-key-add-key-based-replacements
+    "M-m b" "Buffers"
+    "M-m br" "read-only-mode"
+    "M-m f" "Files"
+    "M-m e" "Errors/Linting"
+    "M-m fs" "save-buffer"
+    "M-m fS" "save-some-buffers"
+    "M-m h" "Help"
+    "M-m i" "Insert"
+    "M-m m" "Macros"
+    "M-m n" "Narrow"
+    "M-m p" "Projects"
+    "M-m ps" "Search"
+    "M-m q" "Quit"
+    "M-m r" "Rectangle/Register"
+    "M-m s" "Search"
+    "M-m w" "Windows"
+    "M-m x" "Text"
+    "M-m xa" "Align"
+    "M-m xl" "Lines"
+    )
+  (which-key-mode 1))
+#+END_SRC
+
+** Misc
+
+*** hydra
+
+#+BEGIN_SRC emacs-lisp
+(use-package hydra
+  :bind
+  ((:map kalle-map)
+   ("w r" . hydra-window-size/body))
+  :config
+  (defhydra hydra-window-size (:color red)
+    "Windows size"
+    ("h" shrink-window-horizontally "shrink horizontal")
+    ("j" shrink-window "shrink vertical")
+    ("k" enlarge-window "enlarge vertical")
+    ("l" enlarge-window-horizontally "enlarge horizontal")))
+#+END_SRC
+
+** Projects
+
+*** counsel-projectile
+
+#+BEGIN_SRC emacs-lisp
+(use-package counsel-projectile
+  :bind
+  ((:map kalle-map)
+   ("p b" . counsel-projectile-switch-to-buffer)
+   ("p d" . counsel-projectile-find-dir)
+   ("p f" . counsel-projectile-find-file)
+   ("p g" . counsel-projectile-find-file-dwim)
+   ("p O c" . counsel-projectile-org-capture)
+   ("p p" . counsel-projectile-switch-project)
+   ("p s g" . counsel-projectile-grep)
+   ("p s r" . counsel-projectile-rg)
+   ("p s s" . counsel-projectile-ag)
+   ("p SPC" . counsel-projectile)
+   ("s P" . counsel-projectile-git-grep)
+   ("s p" . counsel-projectile-rg)))
+#+END_SRC
+
+*** projectile
+
+#+BEGIN_SRC emacs-lisp
+(use-package projectile
+  :hook (after-init . projectile-mode)
+  :bind
+  ((:map kalle-map)
+   ("p !" . projectile-run-shell-command-in-root)
+   ("p &" . projectile-run-async-shell-command-in-root)
+   ("p a" . projectile-find-other-file)
+   ("p C" . projectile-configure-project)
+   ("p c" . projectile-compile-project)
+   ("p D" . projectile-dired)
+   ("p e" . projectile-recentf)
+   ("p E" . projectile-edit-dir-locals)
+   ("p F" . projectile-find-file-in-known-projects)
+   ("p i" . projectile-invalidate-cache)
+   ("p I" . projectile-ibuffer)
+   ("p j" . projectile-find-tag)
+   ("p k" . projectile-kill-buffers)
+   ("p l" . projectile-find-file-in-directory)
+   ("p m" . projectile-commander)
+   ("p o" . projectile-multi-occur)
+   ("p q" . projectile-switch-open-project)
+   ("p P" . projectile-test-project)
+   ("p r" . projectile-replace)
+   ("p R" . projectile-regenerate-tags)
+   ("p S" . projectile-save-project-buffers)
+   ("p C-t" . projectile-toggle-between-implementation-and-test)
+   ("p T" . projectile-find-test-file)
+   ("p u" . projectile-run-project)
+   ("p v" . projectile-vc)
+   ("p V" . projectile-browse-dirty-projects)
+   ("p z" . projectile-cache-current-file)
+   ("p ESC" . projectile-project-buffers-other-buffer))
+  :init
+  (setq projectile-globally-ignored-file-suffixes '(".elc" ".pyc" ".o")))
+#+END_SRC
+
+** shell
+
+*** compile
+
+#+BEGIN_SRC emacs-lisp
+(use-package compile
+  :hook (compilation-filter . kalle/colorize-compilation-buffer)
+  :init
+  (setq-default compilation-always-kill t
+                compilation-scroll-output 'first-error)
+  :config
+  (defun kalle/colorize-compilation-buffer ()
+    (require 'ansi-color)
+    (let ((inhibit-read-only t))
+      (ansi-color-apply-on-region compilation-filter-start (point)))))
+#+END_SRC
+
+*** shell-pop
+
+#+BEGIN_SRC emacs-lisp
+(use-package shell-pop
+  :commands (shell-pop kalle/projectile-shell-pop)
+  :bind
+  (("M-'" . kalle/shell-pop-no-cwd)
+   ("C-'" . kalle/shell-pop-full-screen-no-cwd)
+   (:map kalle-map)
+   ("'" . shell-pop)
+   ("p '" . kalle/projectile-shell-pop))
+  :preface
+  (defun kalle/projectile-shell-pop ()
+    "Open a term buffer at projectile project root."
+    (interactive)
+    (let ((default-directory (projectile-project-root)))
+      (call-interactively 'shell-pop)))
+
+  (defun kalle/shell-pop-no-cwd ()
+    (interactive)
+    (let ((shell-pop-autocd-to-working-dir nil))
+      (call-interactively 'shell-pop)))
+
+  (defun kalle/shell-pop-full-screen-no-cwd ()
+    (interactive)
+    (let ((shell-pop-autocd-to-working-dir nil)
+          (shell-pop-window-position 'full))
+      (call-interactively 'shell-pop)))
+  :init
+  (setq shell-pop-shell-type '("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))
+        shell-pop-restore-window-configuration nil
+        shell-pop-full-span t))
+#+END_SRC
+
+*** term
+
+#+BEGIN_SRC emacs-lisp
+(use-package term
+  :commands term
+  :preface
+  (defun kalle/expose-global-binding-in-term (binding)
+    (define-key term-raw-map binding
+      (lookup-key (current-global-map) binding)))
+  :config
+  (kalle/expose-global-binding-in-term (kbd "M-'"))
+  (kalle/expose-global-binding-in-term (kbd "M-o"))
+  (kalle/expose-global-binding-in-term (kbd "M-m"))
+  (define-key term-raw-map (kbd "C-S-v") 'term-paste)
+  (define-key term-raw-map (kbd "C-c C-y") 'term-paste))
+#+END_SRC
+
+** Text-editing
+
+*** comment-dwim-2
+
+#+BEGIN_SRC emacs-lisp
+(use-package comment-dwim-2
+  :bind ("M-;" . comment-dwim-2))
+#+END_SRC
+
+*** crux
+
+#+BEGIN_SRC emacs-lisp
+(use-package crux
+  :bind
+  (("C-a" . crux-move-beginning-of-line)
+   ("M-*" . crux-top-join-line)
+   ("C-<backspace>" . crux-kill-line-backwards)
+   ([(shift return)] . crux-smart-open-line)
+   ([(control shift return)] . crux-smart-open-line-above)
+   (:map kalle-map)
+   ("b C-d" . crux-kill-other-buffers)
+   ("f D" . crux-delete-file-and-buffer)
+   ("f R" . crux-rename-file-and-buffer)
+   ("=" . crux-cleanup-buffer-or-region))
+  :config
+  (crux-with-region-or-buffer indent-region)
+  (crux-with-region-or-buffer untabify))
+#+END_SRC
+
+*** delsel
+
+#+BEGIN_SRC emacs-lisp
+(use-package delsel
+  :config
+  (delete-selection-mode 1))
+#+END_SRC
+
+*** dtrt-indent
+
+#+BEGIN_SRC emacs-lisp
+(use-package dtrt-indent
+  :hook (kalle-before-first-cmd . dtrt-indent-global-mode))
+#+END_SRC
+
+*** flycheck
+
+#+BEGIN_SRC emacs-lisp
+(use-package flycheck
+  :defer 1
+  :bind
+  ((:map kalle-map)
+   ("e c"   . flycheck-buffer)
+   ("e C"   . flycheck-clear)
+   ("e C-c" . flycheck-compile)
+   ("e n"   . flycheck-next-error)
+   ("e p"   . flycheck-previous-error)
+   ("e l"   . flycheck-list-errors)
+   ("e C-w" . flycheck-copy-errors-as-kill)
+   ("e s"   . flycheck-select-checker)
+   ("e ?"   . flycheck-describe-checker)
+   ("e h"   . flycheck-display-error-at-point)
+   ("e e"   . flycheck-explain-error-at-point)
+   ("e H"   . display-local-help)
+   ("e i"   . flycheck-manual)
+   ("e V"   . flycheck-version)
+   ("e v"   . flycheck-verify-setup)
+   ("e x"   . flycheck-disable-checker))
+  :init
+  (setq flycheck-indication-mode 'right-fringe
+        flycheck-disabled-checkers '(emacs-lisp-checkdoc))
+  :config
+  (define-key flycheck-mode-map flycheck-keymap-prefix nil)
+  (global-flycheck-mode 1))
+#+END_SRC
+
+*** iedit
+
+#+BEGIN_SRC emacs-lisp
+(use-package iedit
+  :bind ("C-;" . iedit-mode))
+#+END_SRC
+
+*** smartparens
+
+#+BEGIN_SRC emacs-lisp
+(use-package smartparens
+  :defer 0.5
+  :preface
+  (defun +smartparens-smartparens-pair-newline (id action context)
+    (save-excursion
+      (newline)
+      (indent-according-to-mode)))
+
+  (defun +smartparens-pair-newline-and-indent (id action context)
+    (+smartparens-smartparens-pair-newline id action context)
+    (indent-according-to-mode))
+  :init
+  (setq sp-autoskip-closing-pair 'always
+        sp-highlight-pair-overlay nil
+        sp-base-key-bindings 'smartparens
+        sp-cancel-autoskip-on-backward-movement nil
+        sp-show-pair-from-inside t)
+  :config
+  (require 'smartparens-config)
+
+  (sp-use-smartparens-bindings)
+  (show-smartparens-global-mode 1)
+  (smartparens-global-mode 1)
+  (define-key smartparens-mode-map (kbd "M-<backspace>") 'nil)
+  (sp-pair "{" nil :post-handlers
+           '(:add (+smartparens-pair-newline-and-indent "RET")))
+  (sp-pair "[" nil :post-handlers
+           '(:add (+smartparens-pair-newline-and-indent "RET"))))
+#+END_SRC
+
+*** undo-tree
+
+#+BEGIN_SRC emacs-lisp
+(use-package undo-tree
+  :hook (kalle-before-first-cmd . global-undo-tree-mode))
+#+END_SRC
+
+*** wgrep
+
+#+BEGIN_SRC emacs-lisp
+(use-package wgrep
+  :commands (wgrep-setup wgrep-change-to-wgrep-mode)
+  :hook (grep-mode . wgrep-setup))
+#+END_SRC
+
+*** wgrep-ag
+
+#+BEGIN_SRC emacs-lisp
+(use-package wgrep-ag
+  :hook (ag-mode . wgrep-ag-setup))
+#+END_SRC
+
+*** ws-butler
+
+#+BEGIN_SRC emacs-lisp
+(use-package ws-butler
+  :hook (find-file . ws-butler-global-mode))
+#+END_SRC
+
+*** zop-to-char
+
+#+BEGIN_SRC emacs-lisp
+(use-package zop-to-char
+  :bind
+  (("M-z" . zop-to-char)
+   ("M-Z" . zop-up-to-char)))
+#+END_SRC
+
+** Text-navigation
+
+*** ivy-xref
+
+#+BEGIN_SRC emacs-lisp
+(use-package ivy-xref
+  :commands ivy-xref-show-xrefs
+  :init
+  (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
+#+END_SRC
+
+** Version-control
+
+** Visual
+
+*** gruvbox
+
+#+BEGIN_SRC emacs-lisp
+(use-package gruvbox
+  :config
+  (load-theme 'gruvbox t))
+#+END_SRC
+
+** Windows
+
+*** windmove
+
+#+BEGIN_SRC emacs-lisp
+(use-package windmove
+  :bind
+  ((:map kalle-map)
+   ("w h" . windmove-left)
+   ("w j" . windmove-down)
+   ("w k" . windmove-up)
+   ("w l" . windmove-right)))
+#+END_SRC
+
+* Languages
+
+** Org
+
+*** Org
+
+#+BEGIN_SRC emacs-lisp
+(use-package org
+  :defer t
+  :init
+  (setq-default
+   org-src-window-setup 'current-window
+   org-edit-src-content-indentation 0
+   org-fontify-done-headline t
+   org-fontify-quote-and-verse-blocks t
+   org-fontify-whole-heading-line t
+   org-hide-leading-stars t
+   org-hide-leading-stars-before-indent-mode t
+   org-image-actual-width nil
+   org-imenu-depth 8
+   org-src-fontify-natively t
+   org-src-tab-acts-natively t
+   org-startup-indented t
+   org-startup-with-inline-images t
+   outline-blank-line t))
+#+END_SRC
