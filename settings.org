@@ -86,6 +86,16 @@ If the univeral arg is 16 then only kill the window."
     (call-interactively 'kill-this-buffer))
   (when (or (equal '(4) arg) (equal '(16) arg))
     (delete-window)))
+
+(defun kalle/switch-to-scratch ()
+  "Switch to the scratch buffer"
+  (interactive)
+  (switch-to-buffer "*scratch*"))
+
+(defun kalle/switch-to-messages ()
+  "Switch to the message buffer"
+  (interactive)
+  (switch-to-buffer "*Messages*"))
 #+END_SRC
 
 ** Editing
@@ -145,8 +155,10 @@ used then kill the buffer too."
  ;; Top-level
  :prefix-map kalle-map
  :prefix "M-m"
- 
+
  ;; (B)uffers
+ ("bm" . kalle/switch-to-messages)
+ ("bs" . kalle/switch-to-scratch)
  ("bd" . kalle/kill-buffer-maby-window)
 
   ;; (Q)uit
@@ -154,13 +166,12 @@ used then kill the buffer too."
  ("qq" . save-buffers-kill-terminal)
 
  ;; (S)earch
- 
+
  ;; (W)indows
  ("wd" . kalle/delete-window-maby-buffer)
  ("wm" . delete-other-windows)
  ("ws" . split-window-below)
  ("wv" . split-window-horizontally)
- ("ww" . other-window)
 
  ;; Te(X)t
  ("x aa" . align)
@@ -453,7 +464,7 @@ used then kill the buffer too."
         (recentf-mode)
         (recentf-track-opened-file))))
   :init
-  (setq-default recentf-max-saved-items 500
+  (setq-default recentf-max-saved-items 100
                 recentf-auto-cleanup 'never)
   :config
   (add-to-list 'recentf-exclude no-littering-var-directory)
@@ -558,6 +569,7 @@ used then kill the buffer too."
     "M-m e" "Errors/Linting"
     "M-m fs" "save-buffer"
     "M-m fS" "save-some-buffers"
+    "M-m g" "Git"
     "M-m h" "Help"
     "M-m i" "Insert"
     "M-m m" "Macros"
@@ -742,6 +754,7 @@ used then kill the buffer too."
    ([(shift return)] . crux-smart-open-line)
    ([(control shift return)] . crux-smart-open-line-above)
    (:map kalle-map)
+   ("TAB" . crux-switch-to-previous-buffer)
    ("b C-d" . crux-kill-other-buffers)
    ("f D" . crux-delete-file-and-buffer)
    ("f R" . crux-rename-file-and-buffer)
@@ -877,6 +890,50 @@ used then kill the buffer too."
 
 ** Text-navigation
 
+*** ag
+
+#+BEGIN_SRC emacs-lisp
+(use-package ag
+  :commands (ag-project))
+#+END_SRC
+
+*** avy
+
+#+BEGIN_SRC emacs-lisp
+(use-package avy
+  :bind
+  (("M-j" . avy-goto-char-2)
+   ("M-l" . avy-goto-line)
+   ("C-M-l" . downcase-word))
+  :init
+  (eval-after-load "isearch"
+    '(define-key isearch-mode-map (kbd "M-j") 'avy-isearch))
+  (setq avy-all-windows t
+        avy-background t))
+#+END_SRC
+
+*** dumb-jump
+
+#+BEGIN_SRC emacs-lisp
+(use-package dumb-jump
+  :bind
+  ("C-M-g" . dumb-jump-go)
+  :init
+  (setq dumb-jump-selector 'ivy))
+#+END_SRC
+
+*** expand-region
+
+#+BEGIN_SRC emacs-lisp
+(use-package expand-region
+  :bind
+  ((:map kalle-map)
+   ("v" . er/expand-region))
+  :init
+  (setq expand-region-contract-fast-key "h"
+        expand-region-reset-fast-key "r"))
+#+END_SRC
+
 *** ivy-xref
 
 #+BEGIN_SRC emacs-lisp
@@ -886,9 +943,160 @@ used then kill the buffer too."
   (setq xref-show-xrefs-function #'ivy-xref-show-xrefs))
 #+END_SRC
 
+*** jump-char
+
+#+BEGIN_SRC emacs-lisp
+(use-package jump-char
+  :bind*
+  (("M-e" . jump-char-forward)
+   ("M-a" . jump-char-backward)))
+#+END_SRC
+
+*** smart-jump
+
+#+BEGIN_SRC emacs-lisp
+(use-package smart-jump
+  :bind*
+  (("M-." . smart-jump-go)
+   ("M-," . smart-jump-back)
+   ("M-?" . smart-jump-references)
+   ("M-P" . smart-jump-peek))
+  :config
+  (smart-jump-setup-default-registers))
+#+END_SRC
+
+*** subword
+
+#+BEGIN_SRC emacs-lisp
+(use-package subword
+  :config
+  (global-subword-mode))
+#+END_SRC
+
+*** swiper
+
+#+BEGIN_SRC emacs-lisp
+(use-package swiper
+  :bind
+  ((:map kalle-map)
+   ("s S" . swiper-all)
+   ("s s" . swiper)
+   (:map swiper-map)
+   ("M-j" . swiper-avy)))
+#+END_SRC
+
 ** Version-control
 
+*** diff-hl
+
+#+BEGIN_SRC emacs-lisp
+(use-package diff-hl
+  :defer 1
+  :commands (diff-hl-magit-post-refresh diff-hl-dired-mode)
+  :bind
+  ((:map kalle-map)
+   ("gn" . diff-hl-next-hunk)
+   ("gp" . diff-hl-previous-hunk)
+   ("gm" . diff-hl-mark-hunk))
+  :init
+  (setq diff-hl-margin-symbols-alist '((insert . " ")
+                                       (delete . " ")
+                                       (change . " ")
+                                       (unknown . " ")
+                                       (ignored . " ")))
+  (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
+  (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+  :config
+  (global-diff-hl-mode)
+  (diff-hl-flydiff-mode)
+  (unless (display-graphic-p)
+    (diff-hl-margin-mode)))
+#+END_SRC
+
+*** git-timemachine
+
+#+BEGIN_SRC emacs-lisp
+(use-package git-timemachine
+  :bind
+  ((:map kalle-map)
+   ("gs" . git-timemachine))
+  :init
+  (add-hook 'git-timemachine-mode-hook '(lambda () (diff-hl-mode -1))))
+#+END_SRC
+
+*** magit
+
+#+BEGIN_SRC emacs-lisp
+(use-package magit
+  :defer t
+  :bind ((:map kalle-map)
+         ("gs" . magit-status)
+         ("gd" . magit-dispatch-popup)
+         ("gf" . magit-file-popup)
+         ("gb" . magit-blame-mode)
+         (:map magit-file-mode-map)
+         ("C-c M-g" . nil)
+         ("C-x g" . nil))
+  :config
+  (magit-add-section-hook 'magit-status-sections-hook
+                          'magit-insert-modules
+                          'magit-insert-stashes
+                          'append))
+#+END_SRC
+
 ** Visual
+
+*** all-the-icons
+
+#+BEGIN_SRC emacs-lisp
+(use-package all-the-icons
+  :defer t)
+#+END_SRC
+
+*** anzu
+
+#+BEGIN_SRC emacs-lisp
+(use-package anzu
+  :hook (kalle-before-first-cmd . global-anzu-mode)
+  :bind
+  (("M-%" . anzu-query-replace)
+   ("C-M-%" . anzu-query-replace-regexp)))
+#+END_SRC
+
+*** default-text-scale
+
+#+BEGIN_SRC emacs-lisp
+(use-package default-text-scale
+  :bind ((:map kalle-map)
+         ("xz" . hydra-text-size/body))
+  :config
+  (defhydra hydra-text-size (:color red)
+    "Windows size"
+    ("+" default-text-scale-increase "Increase default face")
+    ("-" default-text-scale-decrease "Decrease default face")
+    ("=" default-text-scale-reset "Reset default face")))
+#+END_SRC
+
+*** display-line-numbers
+
+#+BEGIN_SRC emacs-lisp
+(use-package display-line-numbers
+  :hook ((text-mode conf-mode prog-mode) . display-line-numbers-mode))
+#+END_SRC
+
+*** fill-column-indicator
+
+#+BEGIN_SRC emacs-lisp
+(use-package fill-column-indicator
+  :hook ((git-commit-setup . kalle/git-fill-column-indicator))
+  :preface
+  (defun kalle/git-fill-column-indicator ()
+    (setq fill-column 72)
+    (fci-mode))
+  :config
+  (with-eval-after-load 'company
+    (add-hook 'fci-mode-hook '(lambda () (company-mode -1)))))
+#+END_SRC
 
 *** gruvbox
 
@@ -898,7 +1106,112 @@ used then kill the buffer too."
   (load-theme 'gruvbox t))
 #+END_SRC
 
+*** minions
+
+#+BEGIN_SRC emacs-lisp
+(use-package minions
+  :init
+  (setq minions-direct '(purpose-mode))
+  :config
+  (minions-mode))
+#+END_SRC
+
+*** uniquify
+
+#+BEGIN_SRC emacs-lisp
+(use-package uniquify
+  :defer t
+  :init
+  (setq uniquify-buffer-name-style 'forward))
+#+END_SRC
+
+*** volatile-highlights
+
+#+BEGIN_SRC emacs-lisp
+(use-package volatile-highlights
+  :config
+  (vhl/define-extension 'undo-tree
+                        'undo-tree-move
+                        'undo-tree-yank)
+  (with-eval-after-load 'undo-tree
+    (vhl/install-extension 'undo-tree)
+    (vhl/load-extension 'undo-tree))
+  (volatile-highlights-mode))
+#+END_SRC
+
+*** whitespace
+
+#+BEGIN_SRC emacs-lisp
+(use-package whitespace
+  :defer t
+  :init
+  (setq whitespace-display-mappings
+        '((tab-mark ?\t [?› ?\t])
+          (newline-mark ?\n [?¬ ?\n])
+          (space-mark ?\ [?·] [?.]))))
+#+END_SRC
+
 ** Windows
+
+*** ace-window
+
+#+BEGIN_SRC emacs-lisp
+(use-package ace-window
+  :bind
+  ((:map kalle-map)
+   ("ww" . ace-select-window)
+   ("wD" . ace-delete-window)
+   ("wS" . ace-swap-window))
+  :init
+  (setq aw-keys '(?a ?f ?j ?k ?l))
+  :config
+  (set-face-attribute
+   'aw-leading-char-face nil
+   :weight 'bold
+   :height 2.0))
+#+END_SRC
+
+*** popwin
+
+#+BEGIN_SRC emacs-lisp
+(use-package popwin
+  :after window-purpose
+  :config
+  ;; Use our own settings
+  (setq popwin:special-display-config nil)
+
+  (push '("^\\*helpful.+\\*$"      :regexp t   :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config)
+  (push '("*Help*"                 :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config)
+  (push '("*Process List*"         :dedicated t :position bottom :stick t :noselect nil :height 0.4) popwin:special-display-config)
+  (push '("*compilation*"          :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config)
+  (push '("*Shell Command Output*" :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
+  (push '("*Async Shell Command*"  :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
+  (push '(" *undo-tree*"           :dedicated t :position right  :stick t :noselect nil :width   60) popwin:special-display-config)
+  (push '("*undo-tree Diff*"       :dedicated t :position bottom :stick t :noselect nil :height 0.3) popwin:special-display-config)
+  (push '("*ert*"                  :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
+  (push '("*grep*"                 :dedicated t :position bottom :stick t :noselect nil :height 0.4) popwin:special-display-config)
+  (push '("^\\*ivy-occur.+\\*$"    :regexp t :dedicated t :position bottom :stick t :noselect nil :height 0.4) popwin:special-display-config)
+  (push '("*nosetests*"            :dedicated t :position bottom :stick t :noselect nil            ) popwin:special-display-config)
+  (push '("^\*WoMan.+\*$"          :regexp t             :position bottom                                   ) popwin:special-display-config)
+  (push '("*Google Translate*"     :dedicated t :position bottom :stick t :noselect t   :height 0.4) popwin:special-display-config)
+  (push '("^\\*Flycheck.+\\*$"     :regexp t :dedicated t :position bottom :stick t :noselect nil) popwin:special-display-config))
+#+END_SRC
+
+*** spacemacs-purpose-popwin
+
+#+BEGIN_SRC emacs-lisp
+(use-package spacemacs-purpose-popwin
+  :after (window-purpose popwin)
+  :preface
+  (defun kalle/advice-pupo-close-window (orig-fun &rest args)
+    (if (region-active-p)
+        (call-interactively 'keyboard-quit)
+      (apply orig-fun args)))
+  :config
+  (advice-add 'pupo/close-window :around #'kalle/advice-pupo-close-window)
+  (require 'cl)
+  (pupo-mode))
+#+END_SRC
 
 *** windmove
 
@@ -912,7 +1225,75 @@ used then kill the buffer too."
    ("w l" . windmove-right)))
 #+END_SRC
 
+*** window-purpose
+
+#+BEGIN_SRC emacs-lisp
+(use-package window-purpose
+  :defer 0.2
+  :bind ((:map kalle-map)
+         ("wpw" . purpose-toggle-window-purpose-dedicated)
+         ("wpb" . purpose-toggle-window-buffer-dedicated))
+  :config
+  (purpose-mode)
+  (setcdr purpose-mode-map nil)
+  (setcdr (assq 'switch-to-buffer purpose-action-sequences)
+          '(purpose-display-maybe-same-window
+            purpose-display-reuse-window-buffer
+            purpose-display-reuse-window-purpose
+            purpose-display-maybe-other-window
+            purpose-display-maybe-other-frame
+            purpose-display-maybe-pop-up-window
+            purpose-display-maybe-pop-up-frame)))
+#+END_SRC
+
 * Languages
+
+** Csharp
+
+*** csharp-mode
+
+#+BEGIN_SRC emacs-lisp
+(use-package csharp-mode
+  :defer t
+  :config
+  (setcdr csharp-mode-map nil))
+#+END_SRC
+
+*** omnisharp
+
+#+BEGIN_SRC emacs-lisp
+(use-package omnisharp
+  :commands (omnisharp-install-server)
+  :hook (csharp-mode . omnisharp-mode)
+  :bind
+  (:map omnisharp-mode-map
+        ("C-c g e" . omnisharp-solution-errors)
+        ("C-c g G" . omnisharp-go-to-definition-other-window)
+        ("C-c g u" . omnisharp-helm-find-usages)
+        ("C-c g U" . omnisharp-find-usages-with-ido)
+        ("C-c g s" . omnisharp-helm-find-symbols)
+        ("C-c g i" . omnisharp-find-implementations)
+        ("C-c g I" . omnisharp-find-implementations-with-ido)
+        ("C-c g r" . omnisharp-navigate-to-region)
+        ("C-c g m" . omnisharp-navigate-to-solution-member)
+        ("C-c g M" . omnisharp-navigate-to-solution-member-other-window)
+        ("C-c g f" . omnisharp-navigate-to-solution-file)
+        ("C-c g F" . omnisharp-navigate-to-solution-file-then-file-member)
+        ("C-c g c" . omnisharp-navigate-to-current-file-member)
+        ("C-c h t" . omnisharp-current-type-information)
+        ("C-c h T" . omnisharp-current-type-information-to-kill-ring)
+        ("C-c r m" . omnisharp-rename)
+        ("C-c r M" . omnisharp-rename-interactively)
+        ("C-c r r" . omnisharp-run-code-action-refactoring)
+        ("C-c s s" . omnisharp-start-omnisharp-server)
+        ("C-c s S" . omnisharp-stop-server)
+        ("C-c s r" . omnisharp-reload-solution)
+        ("C-c s i" . omnisharp-install-server))
+  :config
+  (eval-after-load
+      'company
+    '(add-to-list 'company-backends 'company-omnisharp)))
+#+END_SRC
 
 ** Org
 
