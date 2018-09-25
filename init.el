@@ -11,7 +11,7 @@
         gc-cons-threshold 402653184
         gc-cons-percentage 0.6)
 
-  (add-hook 'after-init-hook
+  (add-hook 'window-setup-hook
             `(lambda ()
                (setq file-name-handler-alist file-name-handler-alist-old
                      gc-cons-threshold 800000
@@ -57,7 +57,10 @@
   (require 'use-package))
 
 (use-package auto-compile
-  :demand t
+  :hook (window-setup . kalle/load-auto-compile)
+  :preface
+  (defun kalle/load-auto-compile ()
+    (require 'auto-compile))
   :config
   (auto-compile-on-load-mode)
   (auto-compile-on-save-mode)
