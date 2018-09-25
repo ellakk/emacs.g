@@ -5,24 +5,15 @@
 ;;;; Optimization
 
 (progn
+  (defvar kalle-after-emacs-load-hook '())
+  (run-with-idle-timer 0 nil (lambda () (run-hooks 'kalle-after-emacs-load-hook)))
+
   (defvar file-name-handler-alist-old file-name-handler-alist)
 
+  ;; these are reset at the end of this file
   (setq file-name-handler-alist nil
         gc-cons-threshold 402653184
-        gc-cons-percentage 0.6)
-
-  (add-hook 'window-setup-hook
-            `(lambda ()
-               (setq file-name-handler-alist file-name-handler-alist-old
-                     gc-cons-threshold 800000
-                     gc-cons-percentage 0.1)
-               (garbage-collect)) t)
-
-  (defvar kalle-before-first-cmd-hook '())
-  (defun kalle/run-before-first-cmd-hook ()
-    (run-hooks 'kalle-before-first-cmd-hook)
-    (remove-hook 'pre-command-hook 'kalle/run-before-first-cmd-hook))
-  (add-hook 'pre-command-hook 'kalle/run-before-first-cmd-hook))
+        gc-cons-percentage 0.6))
 
 ;;;; Startup
 
@@ -57,7 +48,7 @@
   (require 'use-package))
 
 (use-package auto-compile
-  :hook (window-setup . kalle/load-auto-compile)
+  :hook (kalle-after-emacs-load . kalle/load-auto-compile)
   :preface
   (defun kalle/load-auto-compile ()
     (require 'auto-compile))
@@ -362,7 +353,7 @@ used then kill the buffer too."
      try-complete-lisp-symbol)))
 
 (use-package ivy
-  :hook (kalle-before-first-cmd . ivy-mode)
+  :hook (kalle-after-emacs-load . ivy-mode)
   :bind
   ((:map ivy-minibuffer-map)
    ("M-j" . ivy-avy)
@@ -436,13 +427,11 @@ used then kill the buffer too."
 ;;;; Files/History/Bookmarks
 
 (use-package autorevert
-  :defer 0.1
+  :hook (kalle-after-emacs-load . global-auto-revert-mode)
   :init
   (setq-default
    global-auto-revert-non-file-buffers t
-   auto-revert-verbose nil)
-  :config
-  (global-auto-revert-mode))
+   auto-revert-verbose nil))
 
 (use-package dired
   :defer t
@@ -483,11 +472,12 @@ used then kill the buffer too."
    ediff-window-setup-function 'ediff-setup-windows-plain))
 
 (use-package recentf
-  :hook (find-file . kalle/recentf)
+  :hook (kalle-after-emacs-load . kalle/recentf)
   :preface
   (defun kalle/recentf ()
     (unless recentf-mode
-      (let ((inhibit-message t))
+      (require 'shut-up)
+      (shut-up
         (recentf-mode)
         (recentf-track-opened-file))))
   :init
@@ -499,7 +489,7 @@ used then kill the buffer too."
   (add-hook 'kill-emacs-hook #'recentf-cleanup))
 
 (use-package savehist
-  :hook (kalle-before-first-cmd . savehist-mode)
+  :hook (kalle-after-emacs-load . savehist-mode)
   :init
   (setq-default
    savehist-additional-variables '(search-ring regexp-search-ring extended-command-history)
@@ -573,7 +563,7 @@ used then kill the buffer too."
    ("h v" . helpful-variable)))
 
 (use-package which-key
-  :defer 0.1
+  :hook (kalle-after-emacs-load . which-key-mode)
   :init
   (setq which-key-sort-order 'which-key-key-order-alpha
         which-key-compute-remaps t)
@@ -597,8 +587,7 @@ used then kill the buffer too."
     "M-m r" "Rectangle/Register"
     "M-m s" "Search"
     "M-m w" "Windows"
-    "M-m z" "Zoom")
-  (which-key-mode 1))
+    "M-m z" "Zoom"))
 
 ;;;; Misc
 
@@ -633,7 +622,7 @@ used then kill the buffer too."
    ("s p" . counsel-projectile-rg)))
 
 (use-package projectile
-  :hook (window-setup . projectile-mode)
+  :hook (kalle-after-emacs-load . projectile-mode)
   :bind
   ((:map kalle-map)
    ("p !" . projectile-run-shell-command-in-root)
@@ -746,14 +735,10 @@ used then kill the buffer too."
   (crux-with-region-or-buffer untabify))
 
 (use-package delsel
-  :defer 0.1
-  :config
-  (delete-selection-mode))
+  :hook (kalle-after-emacs-load . delete-selection-mode))
 
 (use-package dtrt-indent
-  :defer 0.1
-  :config
-  (dtrt-indent-global-mode))
+  :hook (kalle-after-emacs-load . dtrt-indent-global-mode))
 
 (use-package flycheck
   :defer 0.5
@@ -815,9 +800,7 @@ used then kill the buffer too."
            '(:add (+smartparens-pair-newline-and-indent "RET"))))
 
 (use-package undo-tree
-  :defer 0.1
-  :config
-  (global-undo-tree-mode))
+  :hook (kalle-after-emacs-load . global-undo-tree-mode))
 
 (use-package wgrep
   :commands (wgrep-setup wgrep-change-to-wgrep-mode)
@@ -827,7 +810,7 @@ used then kill the buffer too."
   :hook (ag-mode . wgrep-ag-setup))
 
 (use-package ws-butler
-  :hook (find-file . ws-butler-global-mode))
+  :hook (kalle-after-emacs-load . ws-butler-global-mode))
 
 (use-package zop-to-char
   :bind
@@ -884,9 +867,7 @@ used then kill the buffer too."
   (smart-jump-setup-default-registers))
 
 (use-package subword
-  :defer 0.1
-  :config
-  (global-subword-mode))
+  :hook (kalle-after-emacs-load . global-subword-mode))
 
 (use-package swiper
   :bind
@@ -899,7 +880,7 @@ used then kill the buffer too."
 ;;;; Version-control
 
 (use-package diff-hl
-  :defer 0.5
+  :hook (after-init . global-diff-hl-mode)
   :commands (diff-hl-magit-post-refresh diff-hl-dired-mode)
   :bind
   ((:map kalle-map)
@@ -915,7 +896,6 @@ used then kill the buffer too."
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
   :config
-  (global-diff-hl-mode)
   (unless (display-graphic-p)
     (diff-hl-margin-mode)))
 
@@ -949,12 +929,10 @@ used then kill the buffer too."
   :defer t)
 
 (use-package anzu
-  :defer 0.1
+  :hook (kalle-after-emacs-load . global-anzu-mode)
   :bind
   (("M-%" . anzu-query-replace)
-   ("C-M-%" . anzu-query-replace-regexp))
-  :config
-  (global-anzu-mode))
+   ("C-M-%" . anzu-query-replace-regexp)))
 
 (use-package default-text-scale
   :bind ((:map kalle-map)
@@ -970,7 +948,7 @@ used then kill the buffer too."
   :hook ((text-mode conf-mode prog-mode) . display-line-numbers-mode))
 
 (use-package doom-modeline
-  :hook (window-setup . doom-modeline-init)
+  :hook (emacs-startup . doom-modeline-init)
   :init
   (setq doom-modeline-height 29))
 
@@ -1002,15 +980,14 @@ used then kill the buffer too."
   (setq uniquify-buffer-name-style 'forward))
 
 (use-package volatile-highlights
-  :defer 0.1
+  :hook (kalle-after-emacs-load . volatile-highlights-mode)
   :config
   (vhl/define-extension 'undo-tree
                         'undo-tree-move
                         'undo-tree-yank)
   (with-eval-after-load 'undo-tree
     (vhl/install-extension 'undo-tree)
-    (vhl/load-extension 'undo-tree))
-  (volatile-highlights-mode))
+    (vhl/load-extension 'undo-tree)))
 
 (use-package whitespace
   :defer t
@@ -1079,12 +1056,11 @@ used then kill the buffer too."
    ("w l" . windmove-right)))
 
 (use-package window-purpose
-  :defer 0.1
+  :hook (kalle-after-emacs-load . purpose-mode)
   :bind ((:map kalle-map)
          ("wpw" . purpose-toggle-window-purpose-dedicated)
          ("wpb" . purpose-toggle-window-buffer-dedicated))
   :config
-  (purpose-mode)
   (setcdr purpose-mode-map nil)
   (setcdr (assq 'switch-to-buffer purpose-action-sequences)
           '(purpose-display-maybe-same-window
@@ -1270,6 +1246,13 @@ If optional argument P is present, test this instead of point."
 ;;; The end
 
 (progn ;     startup
+  (add-hook 'kalle-after-emacs-load-hook
+            `(lambda ()
+               (setq file-name-handler-alist file-name-handler-alist-old
+                     gc-cons-threshold 800000
+                     gc-cons-percentage 0.1)
+               (garbage-collect)) t)
+
   (message "Loading %s...done (%.3fs)" user-init-file
            (float-time (time-subtract (current-time)
                                       before-user-init-time)))
@@ -1280,6 +1263,8 @@ If optional argument P is present, test this instead of point."
                (float-time (time-subtract (current-time)
                                           before-user-init-time))))
             t))
+
+
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil
