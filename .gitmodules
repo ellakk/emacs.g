@@ -62,6 +62,9 @@
 [submodule "dired+"]
 	path = lib/dired+
 	url = git@github.com:emacsmirror/dired-plus.git
+[submodule "doom-modeline"]
+	path = lib/doom-modeline
+	url = git@github.com:seagle0128/doom-modeline.git
 [submodule "doom-themes"]
 	path = lib/doom-themes
 	url = git@github.com:hlissner/emacs-doom-themes.git
@@ -71,6 +74,9 @@
 [submodule "dumb-jump"]
 	path = lib/dumb-jump
 	url = git@github.com:jacktasia/dumb-jump.git
+[submodule "eldoc-eval"]
+	path = lib/eldoc-eval
+	url = git@github.com:thierryvolpiatto/eldoc-eval.git
 [submodule "elisp-refs"]
 	path = lib/elisp-refs
 	url = git@github.com:Wilfred/elisp-refs.git
@@ -161,9 +167,6 @@
 [submodule "memoize"]
 	path = lib/memoize
 	url = git@github.com:skeeto/emacs-memoize.git
-[submodule "minions"]
-	path = lib/minions
-	url = git@github.com:tarsius/minions.git
 [submodule "no-littering"]
 	path = lib/no-littering
 	url = git@github.com:emacscollective/no-littering.git
@@ -206,6 +209,9 @@
 [submodule "shell-pop"]
 	path = lib/shell-pop
 	url = git@github.com:kyagi/shell-pop-el.git
+[submodule "shrink-path"]
+	path = lib/shrink-path
+	url = https://gitlab.com/bennya/shrink-path.el.git
 [submodule "shut-up"]
 	path = lib/shut-up
 	url = git@github.com:cask/shut-up.git

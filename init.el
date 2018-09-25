@@ -966,6 +966,11 @@ used then kill the buffer too."
 (use-package display-line-numbers
   :hook ((text-mode conf-mode prog-mode) . display-line-numbers-mode))
 
+(use-package doom-modeline
+  :hook (window-setup . doom-modeline-init)
+  :init
+  (setq doom-modeline-height 29))
+
 (use-package fill-column-indicator
   :hook ((git-commit-setup . kalle/git-fill-column-indicator))
   :preface
@@ -987,12 +992,6 @@ used then kill the buffer too."
 
 (use-package hl-todo
   :hook (prog-mode . hl-todo-mode))
-
-
-(use-package minions
-  :hook (window-setup . minions-mode)
-  :init
-  (setq minions-direct '(purpose-mode flycheck-mode)))
 
 (use-package uniquify
   :defer t
