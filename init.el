@@ -507,7 +507,7 @@ used then kill the buffer too."
   :bind
   ((:map kalle-map)
    ("f t" . treemacs)
-   ("p t" . treemacs-projectile))
+   ("p t" . kalle/treemacs-project-toggle))
   :preface
   (defun kalle/treemacs-project-toggle ()
     "Toggle and add the current project to treemacs if not already added."
