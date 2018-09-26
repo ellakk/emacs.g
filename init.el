@@ -264,6 +264,7 @@ used then kill the buffer too."
 (global-set-key (kbd "M-m r") ctl-x-r-map)
 (global-set-key (kbd "M-m h") help-map)
 (global-set-key (kbd "M-m n") narrow-map)
+(global-set-key (kbd "M-m k") kmacro-keymap)
 
 (define-key key-translation-map (kbd "M-m f s") (kbd "C-x C-s"))
 (define-key key-translation-map (kbd "M-m f S") (kbd "C-x s"))
@@ -361,6 +362,7 @@ used then kill the buffer too."
    ("bb" . ivy-switch-buffer))
   :init
   (setq ivy-fixed-height-minibuffer t
+        ivy-on-del-error-function nil
         ivy-format-function 'ivy-format-function-arrow
         ivy-height 15
         ivy-initial-inputs-alist nil
@@ -391,6 +393,7 @@ used then kill the buffer too."
                              "magit-diff: "
                              "magit-revision: "))
   :config
+  (require 'ivy-hydra)
   (define-key ivy-minibuffer-map (kbd "C-l") (kbd "DEL")))
 
 (use-package ivy-rich
@@ -578,13 +581,14 @@ used then kill the buffer too."
     "M-m g" "Git"
     "M-m h" "Help"
     "M-m i" "Insert"
+    "M-m k" "KMacros"
     "M-m l" "Lines"
-    "M-m m" "Macros"
     "M-m n" "Narrow"
     "M-m p" "Projects"
     "M-m ps" "Search"
     "M-m q" "Quit"
     "M-m r" "Rectangle/Register"
+    "M-m S" "Spelling"
     "M-m s" "Search"
     "M-m w" "Windows"
     "M-m z" "Zoom"))
@@ -766,6 +770,39 @@ used then kill the buffer too."
   :config
   (define-key flycheck-mode-map flycheck-keymap-prefix nil)
   (global-flycheck-mode 1))
+
+(use-package flyspell
+  :bind ((:map kalle-map)
+         ("S b" . flyspell-buffer)
+         ("S e" . kalle/ispell-english)
+         ("S s" . kalle/ispell-swedish)
+         ("S w" . flyspell-word)
+         ("t S" . kalle/toggle-spelling))
+  :preface
+  (defun kalle/ispell-swedish ()
+    (interactive)
+    (ispell-change-dictionary "svenska"))
+
+  (defun kalle/ispell-english ()
+    (interactive)
+    (ispell-change-dictionary "english"))
+
+  (defun kalle/toggle-spelling ()
+    (interactive)
+    (if (bound-and-true-p flyspell-mode)
+        (flyspell-mode -1)
+      (if (derived-mode-p 'prog-mode)
+          (flyspell-prog-mode)
+        (flyspell-mode))))
+  :init
+  (setq ispell-program-name "hunspell"
+        flyspell-mode-map nil))
+
+(use-package flyspell-correct
+  :bind ((:map kalle-map)
+         ("S c" . flyspell-correct-wrapper))
+  :config
+  (require 'flyspell-correct-ivy))
 
 (use-package iedit
   :bind ("C-;" . iedit-mode))
