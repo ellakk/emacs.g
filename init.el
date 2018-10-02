@@ -8,6 +8,12 @@
   (defvar kalle-after-emacs-load-hook '())
   (run-with-idle-timer 0 nil (lambda () (run-hooks 'kalle-after-emacs-load-hook)))
 
+  (defvar kalle-before-first-cmd-hook '())
+  (defun kalle/run-before-first-cmd-hook ()
+    (run-hooks 'kalle-before-first-cmd-hook)
+    (remove-hook 'pre-command-hook 'kalle/run-before-first-cmd-hook))
+  (add-hook 'pre-command-hook 'kalle/run-before-first-cmd-hook)
+
   (defvar file-name-handler-alist-old file-name-handler-alist)
 
   ;; these are reset at the end of this file
@@ -354,7 +360,7 @@ used then kill the buffer too."
      try-complete-lisp-symbol)))
 
 (use-package ivy
-  :hook (kalle-after-emacs-load . ivy-mode)
+  :hook (kalle-before-first-cmd . ivy-mode)
   :bind
   ((:map ivy-minibuffer-map)
    ("M-j" . ivy-avy)
@@ -915,7 +921,6 @@ used then kill the buffer too."
    ("M-j" . swiper-avy)))
 
 ;;;; Version-control
-
 (use-package diff-hl
   :hook (after-init . global-diff-hl-mode)
   :commands (diff-hl-magit-post-refresh diff-hl-dired-mode)
@@ -1198,6 +1203,9 @@ used then kill the buffer too."
         web-mode-enable-auto-pairing nil))
 
 ;;;; JavaScript
+
+(use-package add-node-modules-path
+  :hook (js2-mode . add-node-modules-path))
 
 (use-package js2-mode
   :mode "\\.js\\'"
