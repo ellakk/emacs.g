@@ -114,6 +114,9 @@
 	no-byte-compile = flyspell-correct-helm.el
 	no-byte-compile = flyspell-correct-ido.el
 	no-byte-compile = flyspell-correct-popup.el
+[submodule "format-all"]
+	path = lib/format-all
+	url = git@github.com:lassik/emacs-format-all-the-code.git
 [submodule "ghub"]
 	path = lib/ghub
 	url = git@github.com:magit/ghub.git
@@ -159,6 +162,15 @@
 [submodule "js2-mode"]
 	path = lib/js2-mode
 	url = git@github.com:mooz/js2-mode.git
+[submodule "json-mode"]
+	path = lib/json-mode
+	url = git@github.com:joshwnj/json-mode.git
+[submodule "json-reformat"]
+	path = lib/json-reformat
+	url = git@github.com:gongo/json-reformat.git
+[submodule "json-snatcher"]
+	path = lib/json-snatcher
+	url = git@github.com:Sterlingg/json-snatcher.git
 [submodule "jump-char"]
 	path = lib/jump-char
 	url = git@github.com:lewang/jump-char.git
@@ -277,6 +289,9 @@
 [submodule "ws-butler"]
 	path = lib/ws-butler
 	url = git@github.com:lewang/ws-butler.git
+[submodule "yaml-mode"]
+	path = lib/yaml-mode
+	url = git@github.com:yoshiki/yaml-mode.git
 [submodule "yasnippet"]
 	path = lib/yasnippet
 	url = git@github.com:joaotavora/yasnippet.git

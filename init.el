@@ -810,6 +810,11 @@ used then kill the buffer too."
   :config
   (require 'flyspell-correct-ivy))
 
+(use-package format-all
+  :bind
+  ((:map kalle-map)
+   ("e f" . format-all-buffer)))
+
 (use-package iedit
   :bind ("C-;" . iedit-mode))
 
@@ -1249,6 +1254,17 @@ If optional argument P is present, test this instead of point."
   :init
   ;; enable rjsx mode by using magic-mode-alist
   (add-to-list 'magic-mode-alist (cons #'kalle/javascript-jsx-file-p 'rjsx-mode)))
+
+;;;; Minor languages
+
+(use-package git-modes
+  :defer t)
+
+(use-package json-mode
+  :defer t)
+
+(use-package yaml-mode
+  :defer t)
 
 ;;;; Python
 
