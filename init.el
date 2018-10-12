@@ -738,6 +738,7 @@ used then kill the buffer too."
    ("TAB" . crux-switch-to-previous-buffer)
    ("b C-d" . crux-kill-other-buffers)
    ("f D" . crux-delete-file-and-buffer)
+   ("f E" . crux-sudo-edit)
    ("f R" . crux-rename-file-and-buffer)
    ("=" . crux-cleanup-buffer-or-region))
   :config
@@ -748,7 +749,9 @@ used then kill the buffer too."
   :hook (kalle-after-emacs-load . delete-selection-mode))
 
 (use-package dtrt-indent
-  :hook (kalle-after-emacs-load . dtrt-indent-global-mode))
+  :hook (kalle-after-emacs-load . dtrt-indent-global-mode)
+  :init
+  (setq dtrt-indent-verbosity 0))
 
 (use-package flycheck
   :defer 0.5
