@@ -37,7 +37,7 @@
   (setq inhibit-startup-screen t)
   (setq inhibit-startup-echo-area-message "locutus")
   (setq initial-scratch-message "")
-  (setq initial-major-mode 'text-mode)
+
   (setq load-prefer-newer t))
 
 ;;;; Early birds
@@ -513,20 +513,8 @@ used then kill the buffer too."
   :bind
   ((:map kalle-map)
    ("f t" . treemacs)
-   ("p t" . kalle/treemacs-project-toggle))
+   ("p t" . treemacs-projectile))
   :preface
-  (defun kalle/treemacs-project-toggle ()
-    "Toggle and add the current project to treemacs if not already added."
-    (interactive)
-    (if (eq (treemacs-current-visibility) 'visible)
-        (delete-window (treemacs-get-local-window))
-      (let ((path (projectile-project-root))
-            (name (projectile-project-name)))
-        (unless (treemacs-current-workspace)
-          (treemacs--find-workspace))
-        (treemacs-do-add-project-to-workspace path name)
-        (treemacs-select-window))))
-
   (defvar treemacs-use-collapsed-directories (if (executable-find "python") 3 0))
 
   (defvar treemacs-use-git-mode
@@ -632,6 +620,8 @@ used then kill the buffer too."
    ("s p" . counsel-projectile-rg)))
 
 (use-package projectile
+  :commands (projectile-project-root
+             projectile-project-p)
   :hook (kalle-after-emacs-load . projectile-mode)
   :bind
   ((:map kalle-map)
@@ -749,6 +739,7 @@ used then kill the buffer too."
   :hook (kalle-after-emacs-load . delete-selection-mode))
 
 (use-package dtrt-indent
+  :commands (dtrt-indent--search-hook-mapping)
   :hook (kalle-after-emacs-load . dtrt-indent-global-mode)
   :init
   (setq dtrt-indent-verbosity 0))
@@ -1002,6 +993,15 @@ used then kill the buffer too."
   :init
   (setq doom-modeline-height 29))
 
+(use-package doom-themes
+  :config
+  (if (display-graphic-p)
+      (load-theme 'doom-one 't)
+    (load-theme 'doom-molokai 't))
+  (add-hook 'treemacs-mode-hook 'doom-themes-treemacs-config)
+  (doom-themes-visual-bell-config)
+  (doom-themes-org-config))
+
 (use-package fill-column-indicator
   :hook ((git-commit-setup . kalle/git-fill-column-indicator))
   :preface
@@ -1011,15 +1011,6 @@ used then kill the buffer too."
   :config
   (with-eval-after-load 'company
     (add-hook 'fci-mode-hook '(lambda () (company-mode -1)))))
-
-(use-package doom-themes
-  :config
-  (if (display-graphic-p)
-      (load-theme 'doom-one 't)
-    (load-theme 'doom-molokai 't))
-  (add-hook 'treemacs-mode-hook 'doom-themes-treemacs-config)
-  (doom-themes-visual-bell-config)
-  (doom-themes-org-config))
 
 (use-package hl-todo
   :hook (prog-mode . hl-todo-mode))
@@ -1165,7 +1156,7 @@ used then kill the buffer too."
 ;;;; Elisp
 
 (use-package dash
-  :hook ((emacs-lisp-mode lisp-interaction-mode) . dash-enable-font-lock))
+  :hook ((emacs-lisp-mode) . dash-enable-font-lock))
 
 (use-package outline
   :hook (emacs-lisp-mode . outline-minor-mode))
