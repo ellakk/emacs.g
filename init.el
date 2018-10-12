@@ -989,7 +989,12 @@ used then kill the buffer too."
   :hook ((text-mode conf-mode prog-mode) . display-line-numbers-mode))
 
 (use-package doom-modeline
-  :hook (emacs-startup . doom-modeline-init)
+  :hook (emacs-startup . kalle-load-doom-modeline)
+  :preface
+  (defun kalle-load-doom-modeline ()
+    (require 'shut-up)
+    (shut-up
+      (doom-modeline-init)))
   :init
   (setq doom-modeline-height 29))
 
