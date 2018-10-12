@@ -247,6 +247,9 @@ used then kill the buffer too."
  ("bs" . kalle/switch-to-scratch)
  ("bd" . kalle/kill-buffer-maby-window)
 
+ ;; (F)iles
+ ("fc" . set-buffer-file-coding-system)
+
  ;; (L)ines
  ("ld" . delete-duplicate-lines)
  ("lk" . keep-lines)
@@ -569,6 +572,7 @@ used then kill the buffer too."
     "M-m b" "Buffers"
     "M-m br" "read-only-mode"
     "M-m f" "Files"
+    "M-m f e" "Edit"
     "M-m e" "Errors/Linting"
     "M-m fs" "save-buffer"
     "M-m fS" "save-some-buffers"
@@ -729,6 +733,7 @@ used then kill the buffer too."
    ("b C-d" . crux-kill-other-buffers)
    ("f D" . crux-delete-file-and-buffer)
    ("f E" . crux-sudo-edit)
+   ("f e i" . crux-find-user-init-file)
    ("f R" . crux-rename-file-and-buffer)
    ("=" . crux-cleanup-buffer-or-region))
   :config
