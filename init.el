@@ -310,7 +310,6 @@ used then kill the buffer too."
   (("C-x rb" . counsel-bookmark)
    ("M-i" . kalle/counsel-jump-in-buffer)
    ("M-y" . counsel-yank-pop)
-
    (:map kalle-map)
    ("M-m" . counsel-M-x)
    ("fd" . counsel-fzf)
@@ -369,6 +368,17 @@ used then kill the buffer too."
    ("M-j" . ivy-avy)
    (:map kalle-map)
    ("bb" . ivy-switch-buffer))
+  :preface
+  (defvar kalle-filter-allowed-majors
+    '(dired-mode magit-status-mode))
+
+  (defun kalle/buffer-filter (buffer-name)
+    (let* ((buffer (get-buffer buffer-name))
+           (major-mode (buffer-local-value 'major-mode buffer))
+           (keep nil))
+      (when (member major-mode kalle-filter-allowed-majors) (setq keep t))
+      (when (buffer-file-name buffer) (setq keep t))
+      (eq keep nil)))
   :init
   (setq ivy-fixed-height-minibuffer t
         ivy-on-del-error-function nil
@@ -379,29 +389,9 @@ used then kill the buffer too."
         magit-completing-read-function 'ivy-completing-read
         ivy-magic-slash-non-match-action nil
         smex-completion-method 'ivy
-        ivy-use-ignore-default 'always
-        ivy-ignore-buffers '("\\` "
-                             "\\*Flycheck"
-                             "\\*anaconda\\*"
-                             "\\*anaconda-mode\\*"
-                             "\\*ansi-term-.\\*"
-                             "\\*bookmark list\\*"
-                             "\\*spacemacs\\*"
-                             "\\*flycheck.+\\*"
-                             "\\*google translate\\*"
-                             "\\*grep\\*"
-                             "\\*help\\*"
-                             "\\*helpful"
-                             "\\*ibuffer*"
-                             "\\*ivy-occur"
-                             "\\*MDN CSS\\*"
-                             "\\*occur\\*"
-                             "\\*shell-"
-                             "magit: "
-                             "magit-process: "
-                             "magit-diff: "
-                             "magit-revision: "))
+        ivy-use-ignore-default 'always)
   :config
+  (add-to-list 'ivy-ignore-buffers #'kalle/buffer-filter)
   (require 'ivy-hydra)
   (define-key ivy-minibuffer-map (kbd "C-l") (kbd "DEL")))
 
