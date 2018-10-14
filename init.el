@@ -1216,6 +1216,11 @@ used then kill the buffer too."
 (use-package add-node-modules-path
   :hook (js2-mode . add-node-modules-path))
 
+(use-package company-tern
+  :after tern
+  :config
+  (add-to-list 'company-backends 'company-tern))
+
 (use-package js2-mode
   :mode "\\.js\\'"
   :config
@@ -1258,6 +1263,14 @@ If optional argument P is present, test this instead of point."
   :init
   ;; enable rjsx mode by using magic-mode-alist
   (add-to-list 'magic-mode-alist (cons #'kalle/javascript-jsx-file-p 'rjsx-mode)))
+
+(use-package tern
+  :hook (js2-mode . tern-mode)
+  :init
+  (setq tern-command '("tern" "--no-port-file"))
+  :config
+  (define-key tern-mode-keymap (kbd "M-.") nil)
+  (define-key tern-mode-keymap (kbd "M-,") nil))
 
 ;;;; Minor languages
 
