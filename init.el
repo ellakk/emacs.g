@@ -118,6 +118,7 @@
   (fset 'yes-or-no-p 'y-or-n-p)
 
   (setq-default
+   switch-to-visible-buffer nil            ; Dont switch to already visible buffer
    hscroll-margin 2                        ; Smooth Scrolling
    hscroll-step 1                          ; ^
    scroll-conservatively 1001              ; ^
@@ -367,18 +368,28 @@ used then kill the buffer too."
   ((:map ivy-minibuffer-map)
    ("M-j" . ivy-avy)
    (:map kalle-map)
+   ("TAB" . kalle/switch-to-previous-buffer)
    ("bb" . ivy-switch-buffer))
   :preface
   (defvar kalle-filter-allowed-majors
-    '(dired-mode magit-status-mode))
+    '(dired-mode magit-status-mode lisp-interaction-mode messages-buffer-mode))
 
   (defun kalle/buffer-filter (buffer-name)
+    "Returns nil if `buffer-name' is to be shown in ivy buffer list"
     (let* ((buffer (get-buffer buffer-name))
            (major-mode (buffer-local-value 'major-mode buffer))
            (keep nil))
       (when (member major-mode kalle-filter-allowed-majors) (setq keep t))
       (when (buffer-file-name buffer) (setq keep t))
       (eq keep nil)))
+
+  (defun kalle/switch-to-previous-buffer ()
+    "Switch to prevous buffer based on buffers shown in `ivy-switch-buffer'"
+    (interactive)
+    (let ((ivy-buffers (ivy--switch-buffer-matcher "" (ivy--buffer-list ""))))
+      (if (> (length ivy-buffers) 1)
+          (switch-to-buffer (nth 1 ivy-buffers))
+        (switch-to-buffer (other-buffer (current-buffer) 1)))))
   :init
   (setq ivy-fixed-height-minibuffer t
         ivy-on-del-error-function nil
@@ -719,7 +730,6 @@ used then kill the buffer too."
    ([(shift return)] . crux-smart-open-line)
    ([(control shift return)] . crux-smart-open-line-above)
    (:map kalle-map)
-   ("TAB" . crux-switch-to-previous-buffer)
    ("b C-d" . crux-kill-other-buffers)
    ("f D" . crux-delete-file-and-buffer)
    ("f E" . crux-sudo-edit)
