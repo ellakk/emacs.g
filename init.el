@@ -678,9 +678,8 @@ used then kill the buffer too."
   :commands (shell-pop kalle/projectile-shell-pop)
   :bind
   (("M-'" . kalle/shell-pop-no-cwd)
-   ("C-'" . kalle/shell-pop-full-screen-no-cwd)
    (:map kalle-map)
-   ("'" . shell-pop)
+   ("'" . kalle/shell-pop-full-screen-no-cwd)
    ("p '" . kalle/projectile-shell-pop))
   :preface
   (defun kalle/projectile-shell-pop ()
@@ -815,7 +814,13 @@ used then kill the buffer too."
    ("e f" . format-all-buffer)))
 
 (use-package iedit
-  :bind ("C-;" . iedit-mode))
+  :bind ("M-h" . iedit-mode)
+  :init
+  (setq iedit-toggle-key-default (kbd "M-h"))
+  (add-hook 'iedit-mode-hook 'push-mark)
+  (with-eval-after-load 'company
+    (add-hook 'iedit-mode-hook '(lambda () (company-mode -1)))
+    (add-hook 'iedit-mode-end-hook '(lambda () (company-mode)))))
 
 (use-package smartparens
   :defer 0.1
@@ -879,6 +884,9 @@ used then kill the buffer too."
     '(define-key isearch-mode-map (kbd "M-j") 'avy-isearch))
   (setq avy-all-windows t
         avy-background t))
+
+(use-package goto-chg
+  :bind ("M-C" . goto-last-change))
 
 (use-package dumb-jump
   :bind
@@ -1341,8 +1349,6 @@ If optional argument P is present, test this instead of point."
                (float-time (time-subtract (current-time)
                                           before-user-init-time))))
             t))
-
-
 
 ;; Local Variables:
 ;; indent-tabs-mode: nil

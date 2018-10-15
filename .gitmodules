@@ -132,6 +132,9 @@
 [submodule "google-translate"]
 	path = lib/google-translate
 	url = git@github.com:atykhonov/google-translate.git
+[submodule "goto-chg"]
+	path = lib/goto-chg
+	url = git@github.com:emacs-evil/goto-chg.git
 [submodule "graphql"]
 	path = lib/graphql
 	url = git@github.com:vermiculus/graphql.el.git
