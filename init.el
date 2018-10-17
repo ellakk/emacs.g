@@ -1283,6 +1283,9 @@ If optional argument P is present, test this instead of point."
 
 ;;;; Minor languages
 
+(use-package ansible
+  :hook (yaml-mode . ansible))
+
 (use-package git-modes
   :defer t)
 

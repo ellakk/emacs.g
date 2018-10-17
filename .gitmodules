@@ -16,6 +16,9 @@
 [submodule "anaconda-mode"]
 	path = lib/anaconda-mode
 	url = git@github.com:proofit404/anaconda-mode.git
+[submodule "ansible"]
+	path = lib/ansible
+	url = git@github.com:k1LoW/emacs-ansible.git
 [submodule "anzu"]
 	path = lib/anzu
 	url = git@github.com:syohex/emacs-anzu.git
