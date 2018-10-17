@@ -999,6 +999,7 @@ used then kill the buffer too."
     ("=" default-text-scale-reset "Reset default face")))
 
 (use-package display-line-numbers
+  :when (version< "26" emacs-version)
   :hook ((text-mode conf-mode prog-mode) . display-line-numbers-mode))
 
 (use-package doom-modeline
