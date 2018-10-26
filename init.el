@@ -967,7 +967,7 @@ used then kill the buffer too."
    ("gs" . magit-status)
    ("gd" . magit-dispatch-popup)
    ("gf" . magit-file-popup)
-   ("gb" . magit-blame-mode)
+   ("gb" . magit-blame)
    (:map magit-file-mode-map)
    ("C-c M-g" . nil)
    ("C-x g" . nil))
