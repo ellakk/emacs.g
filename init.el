@@ -699,7 +699,7 @@ used then kill the buffer too."
           (shell-pop-window-position 'full))
       (call-interactively 'shell-pop)))
   :init
-  (setq shell-pop-shell-type '("ansi-term" "*ansi-term*" (lambda nil (ansi-term shell-pop-term-shell)))
+  (setq shell-pop-shell-type '("ansi-term" "*shell-pop-term*" (lambda nil (ansi-term shell-pop-term-shell)))
         shell-pop-restore-window-configuration nil
         shell-pop-full-span t))
 
