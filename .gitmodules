@@ -214,7 +214,7 @@
 	url = git@github.com:alphapapa/outorg.git
 [submodule "outshine"]
 	path = lib/outshine
-	url = git@github.com:thblt/outshine.git
+	url = git@github.com:alphapapa/outshine.git
 [submodule "packed"]
 	path = lib/packed
 	url = git@github.com:emacscollective/packed.git
