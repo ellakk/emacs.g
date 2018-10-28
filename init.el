@@ -834,14 +834,25 @@ used then kill the buffer too."
   ((:map kalle-map)
    ("e f" . format-all-buffer)))
 
-(use-package iedit
-  :bind ("M-h" . iedit-mode)
+(use-package multiple-cursors
+  :bind (("M-h" . nil)
+         ("M-h M-h" . mc/mark-all-dwim)
+         ("M-h M-n" . mc/mark-next-symbol-like-this)
+         ("M-h M-p" . mc/mark-previous-symbol-like-this)
+         ("M-h A" . mc/mark-all-like-this)
+         ("M-h a" . mc/mark-all-like-this-in-defun)
+         ("M-h N" . mc/unmark-next-like-this)
+         ("M-h n" . mc/mark-next-like-this)
+         ("M-h l" . mc/edit-lines)
+         ("M-h P" . mc/unmark-previous-like-this)
+         ("M-h p" . mc/mark-previous-like-this)
+         ("M-h S" . mc/mark-all-symbols-like-this)
+         ("M-h s" . mc/mark-all-symbols-like-this-in-defun)
+         ("M-h W" . mc/mark-all-words-like-this)
+         ("M-h w" . mc/mark-all-words-like-this-in-defun))
   :init
-  (setq iedit-toggle-key-default (kbd "M-h"))
-  (add-hook 'iedit-mode-hook 'push-mark)
-  (with-eval-after-load 'company
-    (add-hook 'iedit-mode-hook '(lambda () (company-mode -1)))
-    (add-hook 'iedit-mode-end-hook '(lambda () (company-mode)))))
+  (with-eval-after-load 'multiple-cursors-core
+    (require 'multiple-cursors)))
 
 (use-package smartparens
   :defer 0.1
