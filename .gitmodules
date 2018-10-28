@@ -102,9 +102,15 @@
 [submodule "epl"]
 	path = lib/epl
 	url = git@github.com:cask/epl.git
+[submodule "eterm-256color"]
+	path = lib/eterm-256color
+	url = git@github.com:dieggsy/eterm-256color.git
 [submodule "expand-region"]
 	path = lib/expand-region
 	url = git@github.com:magnars/expand-region.el.git
+[submodule "eyebrowse"]
+	path = lib/eyebrowse
+	url = git@github.com:wasamasa/eyebrowse.git
 [submodule "f"]
 	path = lib/f
 	url = git@github.com:rejeep/f.el.git
@@ -303,6 +309,9 @@
 [submodule "ws-butler"]
 	path = lib/ws-butler
 	url = git@github.com:lewang/ws-butler.git
+[submodule "xterm-color"]
+	path = lib/xterm-color
+	url = git@github.com:atomontage/xterm-color.git
 [submodule "yaml-mode"]
 	path = lib/yaml-mode
 	url = git@github.com:yoshiki/yaml-mode.git

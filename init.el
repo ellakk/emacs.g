@@ -664,15 +664,13 @@ used then kill the buffer too."
 ;;;; Shell
 
 (use-package compile
-  :hook (compilation-filter . kalle/colorize-compilation-buffer)
+  :defer t
   :init
   (setq-default compilation-always-kill t
-                compilation-scroll-output 'first-error)
-  :config
-  (defun kalle/colorize-compilation-buffer ()
-    (require 'ansi-color)
-    (let ((inhibit-read-only t))
-      (ansi-color-apply-on-region compilation-filter-start (point)))))
+                compilation-scroll-output 'first-error))
+
+(use-package eterm-256color
+  :hook (term-mode . eterm-256color-mode))
 
 (use-package shell-pop
   :commands (shell-pop kalle/projectile-shell-pop)
@@ -701,6 +699,7 @@ used then kill the buffer too."
   :init
   (setq shell-pop-shell-type '("ansi-term" "*shell-pop-term*" (lambda nil (ansi-term shell-pop-term-shell)))
         shell-pop-restore-window-configuration nil
+        shell-pop-window-size 50
         shell-pop-full-span t))
 
 (use-package term
@@ -715,6 +714,28 @@ used then kill the buffer too."
   (kalle/expose-global-binding-in-term (kbd "M-m"))
   (define-key term-raw-map (kbd "C-S-v") 'term-paste)
   (define-key term-raw-map (kbd "C-c C-y") 'term-paste))
+
+(use-package xterm-color
+  :defer t
+  :init
+  (setq compilation-environment '("TERM=xterm-256color"))
+  (setq comint-output-filter-functions
+        (remove 'ansi-color-process-output comint-output-filter-functions))
+  (add-hook 'shell-mode-hook
+            (lambda () (add-hook 'comint-preoutput-filter-functions 'xterm-color-filter nil t)))
+  (add-hook 'compilation-start-hook
+            (lambda (proc)
+              ;; We need to differentiate between compilation-mode buffers
+              ;; and running as part of comint (which at this point we assume
+              ;; has been configured separately for xterm-color)
+              (when (eq (process-filter proc) 'compilation-filter)
+                ;; This is a process associated with a compilation-mode buffer.
+                ;; We may call `xterm-color-filter' before its own filter function.
+                (set-process-filter
+                 proc
+                 (lambda (proc string)
+                   (funcall 'compilation-filter proc
+                            (xterm-color-filter string))))))))
 
 ;;;; Text-editing
 
