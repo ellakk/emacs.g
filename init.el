@@ -1038,7 +1038,7 @@ used then kill the buffer too."
   (if (display-graphic-p)
       (load-theme 'doom-one 't)
     (load-theme 'doom-molokai 't))
-  (add-hook 'treemacs-mode-hook 'doom-themes-treemacs-config)
+  (doom-themes-treemacs-config)
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
 
