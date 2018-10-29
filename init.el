@@ -918,7 +918,7 @@ used then kill the buffer too."
         avy-background t))
 
 (use-package goto-chg
-  :bind ("M-C" . goto-last-change))
+  :bind ("M-m ;" . goto-last-change))
 
 (use-package dumb-jump
   :bind
