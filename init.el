@@ -255,7 +255,7 @@ used then kill the buffer too."
  ("ld" . delete-duplicate-lines)
  ("lk" . keep-lines)
  ("lm" . delete-matching-lines)
- ("ln" . delete-non-matching-lines)
+ ("lM" . delete-non-matching-lines)
  ("ls" . sort-lines)
 
  ;; (Q)uit
@@ -581,7 +581,7 @@ used then kill the buffer too."
     "M-m h" "Help"
     "M-m i" "Insert"
     "M-m k" "KMacros"
-    "M-m l" "Lines"
+    "M-m l" "Lines/Workspace"
     "M-m n" "Narrow"
     "M-m p" "Projects"
     "M-m ps" "Search"
@@ -1104,6 +1104,28 @@ used then kill the buffer too."
    'aw-leading-char-face nil
    :weight 'bold
    :height 2.0))
+
+(use-package eyebrowse
+  :bind
+  ((:map kalle-map)
+   ("lp" . eyebrowse-prev-window-config)
+   ("ln" . eyebrowse-next-window-config)
+   ("l TAB" . eyebrowse-last-window-config)
+   ("ld" . eyebrowse-close-window-config)
+   ("l0" . eyebrowse-switch-to-window-config-0)
+   ("l1" . eyebrowse-switch-to-window-config-1)
+   ("l2" . eyebrowse-switch-to-window-config-2)
+   ("l3" . eyebrowse-switch-to-window-config-3)
+   ("l4" . eyebrowse-switch-to-window-config-4)
+   ("l5" . eyebrowse-switch-to-window-config-5)
+   ("l6" . eyebrowse-switch-to-window-config-6)
+   ("l7" . eyebrowse-switch-to-window-config-7)
+   ("l8" . eyebrowse-switch-to-window-config-8)
+   ("l9" . eyebrowse-switch-to-window-config-9))
+  :init
+  (setq eyebrowse-wrap-around nil)
+  :config
+  (eyebrowse-mode))
 
 (use-package popwin
   :after window-purpose
