@@ -837,8 +837,8 @@ used then kill the buffer too."
 (use-package multiple-cursors
   :bind (("M-h" . nil)
          ("M-h M-h" . mc/mark-all-dwim)
-         ("M-h M-n" . mc/mark-next-symbol-like-this)
-         ("M-h M-p" . mc/mark-previous-symbol-like-this)
+         ("M-h M-n" . mc/mark-next-like-this-symbol)
+         ("M-h M-p" . mc/mark-previous-like-this-symbol)
          ("M-h A" . mc/mark-all-like-this)
          ("M-h a" . mc/mark-all-like-this-in-defun)
          ("M-h N" . mc/unmark-next-like-this)
