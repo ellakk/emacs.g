@@ -799,6 +799,11 @@ used then kill the buffer too."
       [16 48 112 240 112 48 16] nil nil 'center))
   (global-flycheck-mode 1))
 
+(use-package flycheck-popup-tip
+  :hook (flycheck-mode . flycheck-popup-tip-mode)
+  :init
+  (setq flycheck-popup-tip-error-prefix "✕ "))
+
 (use-package flyspell
   :bind ((:map kalle-map)
          ("S b" . flyspell-buffer)
