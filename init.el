@@ -794,6 +794,9 @@ used then kill the buffer too."
         flycheck-disabled-checkers '(emacs-lisp-checkdoc))
   :config
   (define-key flycheck-mode-map flycheck-keymap-prefix nil)
+  (when (fboundp 'define-fringe-bitmap)
+    (define-fringe-bitmap 'flycheck-fringe-bitmap-double-arrow
+      [16 48 112 240 112 48 16] nil nil 'center))
   (global-flycheck-mode 1))
 
 (use-package flyspell
@@ -965,6 +968,7 @@ used then kill the buffer too."
    ("M-j" . swiper-avy)))
 
 ;;;; Version-control
+
 (use-package diff-hl
   :hook (after-init . global-diff-hl-mode)
   :commands (diff-hl-magit-post-refresh diff-hl-dired-mode)
@@ -973,17 +977,39 @@ used then kill the buffer too."
    ("gn" . diff-hl-next-hunk)
    ("gp" . diff-hl-previous-hunk)
    ("gm" . diff-hl-mark-hunk))
+  :preface
+  (defun kalle/setup-fringe-bitmaps ()
+           "Define thin fringe bitmaps for maximum sexiness."
+           (define-fringe-bitmap 'diff-hl-bmp-top [224] nil nil '(center repeated))
+           (define-fringe-bitmap 'diff-hl-bmp-middle [224] nil nil '(center repeated))
+           (define-fringe-bitmap 'diff-hl-bmp-bottom [224] nil nil '(center repeated))
+           (define-fringe-bitmap 'diff-hl-bmp-insert [224] nil nil '(center repeated))
+           (define-fringe-bitmap 'diff-hl-bmp-single [224] nil nil '(center repeated))
+           (define-fringe-bitmap 'diff-hl-bmp-delete [240 224 192 128] nil nil 'top))
+
+  (defun kalle/vc-gutter-type-at-pos (type _pos)
+           "Return the bitmap for `diff-hl' to use for change at point."
+           (pcase type
+             (`unknown 'question-mark)
+             (`delete  'diff-hl-bmp-delete)
+             (`change  'diff-hl-bmp-middle)
+             (`ignored 'diff-hl-bmp-i)
+             (x (intern (format "diff-hl-bmp-%s" x)))))
   :init
-  (setq diff-hl-margin-symbols-alist '((insert . " ")
-                                       (delete . " ")
-                                       (change . " ")
-                                       (unknown . " ")
-                                       (ignored . " ")))
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
+
   :config
-  (unless (display-graphic-p)
-    (diff-hl-margin-mode)))
+  (if (display-graphic-p)
+      (progn
+      (setq diff-hl-fringe-bmp-function #'kalle/vc-gutter-type-at-pos
+            diff-hl-draw-borders nil)
+      (add-hook 'diff-hl-mode-hook #'kalle/setup-fringe-bitmaps))
+    (progn
+        (setq diff-hl-margin-symbols-alist
+              '((insert . "❙") (delete . "^") (change . "❙")
+                (unknown . "❙") (ignored . "❙")))
+        (diff-hl-margin-mode))))
 
 (use-package git-timemachine
   :bind
