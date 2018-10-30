@@ -739,6 +739,11 @@ used then kill the buffer too."
 
 ;;;; Text-editing
 
+(use-package aggressive-indent
+  :hook (kalle-after-emacs-load . global-aggressive-indent-mode)
+  :config
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
+
 (use-package comment-dwim-2
   :bind ("M-;" . comment-dwim-2))
 
@@ -1039,6 +1044,11 @@ used then kill the buffer too."
                           'magit-insert-modules
                           'magit-insert-stashes
                           'append))
+
+(use-package magit-todos
+  :hook (magit-mode . magit-todos-mode)
+  :init
+  (setq magit-todos-require-colon nil))
 
 ;;;; Visual
 
