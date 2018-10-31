@@ -1046,9 +1046,11 @@ used then kill the buffer too."
                           'append))
 
 (use-package magit-todos
-  :hook (magit-mode . magit-todos-mode)
+  :after magit
   :init
-  (setq magit-todos-require-colon nil))
+  (setq magit-todos-require-colon nil)
+  :config
+  (magit-todos-mode))
 
 ;;;; Visual
 
