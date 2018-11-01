@@ -126,9 +126,9 @@
 [submodule "flycheck"]
 	path = lib/flycheck
 	url = git@github.com:flycheck/flycheck.git
-[submodule "flycheck-popup-tip"]
-	path = lib/flycheck-popup-tip
-	url = git@github.com:flycheck/flycheck-popup-tip.git
+[submodule "flycheck-posframe"]
+	path = lib/flycheck-posframe
+	url = git@github.com:alexmurray/flycheck-posframe.git
 [submodule "flyspell-correct"]
 	path = lib/flyspell-correct
 	url = git@github.com:d12frosted/flyspell-correct.git
@@ -245,6 +245,9 @@
 [submodule "popwin"]
 	path = lib/popwin
 	url = git@github.com:m2ym/popwin-el.git
+[submodule "posframe"]
+	path = lib/posframe
+	url = git@github.com:tumashu/posframe.git
 [submodule "projectile"]
 	path = lib/projectile
 	url = git@github.com:bbatsov/projectile.git
