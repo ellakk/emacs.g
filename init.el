@@ -774,6 +774,9 @@ used then kill the buffer too."
   :init
   (setq dtrt-indent-verbosity 0))
 
+(use-package embrace
+  :bind (("M-C" . embrace-change)))
+
 (use-package flycheck
   :defer 0.5
   :bind
@@ -891,6 +894,8 @@ used then kill the buffer too."
   (show-smartparens-global-mode 1)
   (smartparens-global-mode 1)
   (define-key smartparens-mode-map (kbd "M-<backspace>") 'nil)
+  (define-key smartparens-mode-map (kbd "M-K") 'sp-change-enclosing)
+  (define-key smartparens-mode-map (kbd "M-S") 'sp-split-sexp)
   (sp-pair "{" nil :post-handlers
            '(:add (+smartparens-pair-newline-and-indent "RET")))
   (sp-pair "[" nil :post-handlers
