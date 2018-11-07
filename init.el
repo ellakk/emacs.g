@@ -1029,7 +1029,7 @@ used then kill the buffer too."
 (use-package git-timemachine
   :bind
   ((:map kalle-map)
-   ("gs" . git-timemachine))
+   ("gt" . git-timemachine))
   :init
   (add-hook 'git-timemachine-mode-hook '(lambda () (diff-hl-mode -1))))
 
