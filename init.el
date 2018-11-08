@@ -741,6 +741,8 @@ used then kill the buffer too."
 
 (use-package aggressive-indent
   :hook (kalle-after-emacs-load . global-aggressive-indent-mode)
+  :bind ((:map kalle-map)
+         ("ta" . global-aggressive-indent-mode))
   :config
   (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
 
@@ -771,6 +773,8 @@ used then kill the buffer too."
 (use-package dtrt-indent
   :commands (dtrt-indent--search-hook-mapping)
   :hook (kalle-after-emacs-load . dtrt-indent-global-mode)
+  :bind ((:map kalle-map)
+         ("ti" . dtrt-indent-global-mode))
   :init
   (setq dtrt-indent-verbosity 0))
 
@@ -1093,6 +1097,7 @@ used then kill the buffer too."
   (setq doom-modeline-height 29))
 
 (use-package doom-themes
+  :disabled t
   :config
   (if (display-graphic-p)
       (load-theme 'doom-one 't)
@@ -1110,6 +1115,10 @@ used then kill the buffer too."
   :config
   (with-eval-after-load 'company
     (add-hook 'fci-mode-hook '(lambda () (company-mode -1)))))
+
+(use-package gruvbox
+  :config
+  (load-theme 'gruvbox t))
 
 (use-package hl-todo
   :hook (prog-mode . hl-todo-mode))
@@ -1392,7 +1401,12 @@ If optional argument P is present, test this instead of point."
   :defer t)
 
 (use-package json-mode
-  :defer t)
+  :defer t
+  :init
+  (add-hook 'json-mode-hook
+            (lambda ()
+              (make-local-variable 'js-indent-level)
+              (setq js-indent-level 2))))
 
 (use-package yaml-mode
   :defer t)
