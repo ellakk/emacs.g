@@ -1097,10 +1097,9 @@ used then kill the buffer too."
   (setq doom-modeline-height 29))
 
 (use-package doom-themes
-  :disabled t
   :config
   (if (display-graphic-p)
-      (load-theme 'doom-one 't)
+      (load-theme 'doom-Iosvkem 't)
     (load-theme 'doom-molokai 't))
   (doom-themes-treemacs-config)
   (doom-themes-visual-bell-config)
@@ -1115,10 +1114,6 @@ used then kill the buffer too."
   :config
   (with-eval-after-load 'company
     (add-hook 'fci-mode-hook '(lambda () (company-mode -1)))))
-
-(use-package gruvbox
-  :config
-  (load-theme 'gruvbox t))
 
 (use-package hl-todo
   :hook (prog-mode . hl-todo-mode))

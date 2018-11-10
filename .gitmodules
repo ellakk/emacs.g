@@ -31,9 +31,6 @@
 [submodule "auto-compile"]
 	path = lib/auto-compile
 	url = git@github.com:emacscollective/auto-compile.git
-[submodule "autothemer"]
-	path = lib/autothemer
-	url = git@github.com:jasonm23/autothemer.git
 [submodule "avy"]
 	path = lib/avy
 	url = git@github.com:abo-abo/avy.git
@@ -162,9 +159,6 @@
 [submodule "graphql"]
 	path = lib/graphql
 	url = git@github.com:vermiculus/graphql.el.git
-[submodule "gruvbox-theme"]
-	path = lib/gruvbox-theme
-	url = git@github.com:greduan/emacs-theme-gruvbox.git
 [submodule "helpful"]
 	path = lib/helpful
 	url = git@github.com:Wilfred/helpful.git
