@@ -1098,9 +1098,7 @@ used then kill the buffer too."
 
 (use-package doom-themes
   :config
-  (if (display-graphic-p)
-      (load-theme 'doom-Iosvkem 't)
-    (load-theme 'doom-molokai 't))
+  (load-theme 'doom-Iosvkem 't)
   (doom-themes-treemacs-config)
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
