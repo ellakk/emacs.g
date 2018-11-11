@@ -708,6 +708,8 @@ used then kill the buffer too."
   (defun kalle/expose-global-binding-in-term (binding)
     (define-key term-raw-map binding
       (lookup-key (current-global-map) binding)))
+  :init
+  (setq term-scroll-to-bottom-on-output t)
   :config
   (kalle/expose-global-binding-in-term (kbd "M-'"))
   (kalle/expose-global-binding-in-term (kbd "M-o"))
