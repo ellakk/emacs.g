@@ -230,6 +230,9 @@
 [submodule "outshine"]
 	path = lib/outshine
 	url = git@github.com:alphapapa/outshine.git
+[submodule "ox-pandoc"]
+	path = lib/ox-pandoc
+	url = git@github.com:kawabata/ox-pandoc.git
 [submodule "packed"]
 	path = lib/packed
 	url = git@github.com:emacscollective/packed.git

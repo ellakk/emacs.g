@@ -1444,6 +1444,11 @@ If optional argument P is present, test this instead of point."
    org-startup-with-inline-images t
    outline-blank-line t))
 
+(use-package ox-pandoc
+  :defer t
+  :init
+  (with-eval-after-load 'org (require 'ox-pandoc)))
+
 ;;; The end
 
 (progn ;     startup
