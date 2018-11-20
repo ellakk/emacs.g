@@ -1442,7 +1442,15 @@ If optional argument P is present, test this instead of point."
    org-src-tab-acts-natively t
    org-startup-indented t
    org-startup-with-inline-images t
-   outline-blank-line t))
+   outline-blank-line t)
+  :config
+  (defadvice org-babel-execute-src-block (around load-language nil activate)
+    "Load language if needed"
+    (let ((language (org-element-property :language (org-element-at-point))))
+      (unless (cdr (assoc (intern language) org-babel-load-languages))
+        (add-to-list 'org-babel-load-languages (cons (intern language) t))
+        (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages))
+      ad-do-it)))
 
 (use-package ox-pandoc
   :defer t
