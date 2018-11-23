@@ -774,11 +774,22 @@ used then kill the buffer too."
 
 (use-package dtrt-indent
   :commands (dtrt-indent--search-hook-mapping)
-  :hook (kalle-after-emacs-load . dtrt-indent-global-mode)
+  :hook ((change-major-mode-after-body read-only-mode-hook) . kalle/detect-indentation)
   :bind ((:map kalle-map)
          ("ti" . dtrt-indent-global-mode))
+  :preface
+  (defvar kalle-detect-indentation-excluded-modes '(fundamental-mode)
+  "A list of major modes in which indentation should be automatically
+detected.")
+  (defun kalle/detect-indentation ()
+    (unless (or (not after-init-time)
+                (member (substring (buffer-name) 0 1) '(" " "*"))
+                (memq major-mode kalle-detect-indentation-excluded-modes))
+      (dtrt-indent-mode +1)))
   :init
-  (setq dtrt-indent-verbosity 0))
+  (setq dtrt-indent-verbosity 0)
+  :config
+  (push '(t tab-width) dtrt-indent-hook-generic-mapping-list))
 
 (use-package embrace
   :bind (("M-C" . embrace-change)))
@@ -1089,12 +1100,19 @@ used then kill the buffer too."
   :hook ((text-mode conf-mode prog-mode) . display-line-numbers-mode))
 
 (use-package doom-modeline
-  :hook (emacs-startup . kalle-load-doom-modeline)
+  :hook (after-init . kalle-load-doom-modeline)
   :preface
   (defun kalle-load-doom-modeline ()
     (require 'shut-up)
     (shut-up
-      (doom-modeline-init)))
+      (doom-modeline-init))
+    (doom-modeline-def-segment indent-style
+      (propertize (format "%s%d  "
+                          (if indent-tabs-mode "⭾" "␣")
+                          tab-width)))
+    (doom-modeline-def-modeline 'main
+                                '(bar workspace-number window-number evil-state god-state ryo-modal-state matches " " buffer-info remote-host buffer-position " " selection-info)
+                                '(indent-style global input-method buffer-encoding major-mode process vcs flycheck)))
   :init
   (setq doom-modeline-height 29))
 
