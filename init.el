@@ -1008,22 +1008,22 @@ detected.")
    ("gm" . diff-hl-mark-hunk))
   :preface
   (defun kalle/setup-fringe-bitmaps ()
-           "Define thin fringe bitmaps for maximum sexiness."
-           (define-fringe-bitmap 'diff-hl-bmp-top [224] nil nil '(center repeated))
-           (define-fringe-bitmap 'diff-hl-bmp-middle [224] nil nil '(center repeated))
-           (define-fringe-bitmap 'diff-hl-bmp-bottom [224] nil nil '(center repeated))
-           (define-fringe-bitmap 'diff-hl-bmp-insert [224] nil nil '(center repeated))
-           (define-fringe-bitmap 'diff-hl-bmp-single [224] nil nil '(center repeated))
-           (define-fringe-bitmap 'diff-hl-bmp-delete [240 224 192 128] nil nil 'top))
+    "Define thin fringe bitmaps for maximum sexiness."
+    (define-fringe-bitmap 'diff-hl-bmp-top [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'diff-hl-bmp-middle [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'diff-hl-bmp-bottom [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'diff-hl-bmp-insert [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'diff-hl-bmp-single [224] nil nil '(center repeated))
+    (define-fringe-bitmap 'diff-hl-bmp-delete [240 224 192 128] nil nil 'top))
 
   (defun kalle/vc-gutter-type-at-pos (type _pos)
-           "Return the bitmap for `diff-hl' to use for change at point."
-           (pcase type
-             (`unknown 'question-mark)
-             (`delete  'diff-hl-bmp-delete)
-             (`change  'diff-hl-bmp-middle)
-             (`ignored 'diff-hl-bmp-i)
-             (x (intern (format "diff-hl-bmp-%s" x)))))
+    "Return the bitmap for `diff-hl' to use for change at point."
+    (pcase type
+      (`unknown 'question-mark)
+      (`delete  'diff-hl-bmp-delete)
+      (`change  'diff-hl-bmp-middle)
+      (`ignored 'diff-hl-bmp-i)
+      (x (intern (format "diff-hl-bmp-%s" x)))))
   :init
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
@@ -1031,14 +1031,14 @@ detected.")
   :config
   (if (display-graphic-p)
       (progn
-      (setq diff-hl-fringe-bmp-function #'kalle/vc-gutter-type-at-pos
-            diff-hl-draw-borders nil)
-      (add-hook 'diff-hl-mode-hook #'kalle/setup-fringe-bitmaps))
+        (setq diff-hl-fringe-bmp-function #'kalle/vc-gutter-type-at-pos
+              diff-hl-draw-borders nil)
+        (add-hook 'diff-hl-mode-hook #'kalle/setup-fringe-bitmaps))
     (progn
-        (setq diff-hl-margin-symbols-alist
-              '((insert . "❙") (delete . "^") (change . "❙")
-                (unknown . "❙") (ignored . "❙")))
-        (diff-hl-margin-mode))))
+      (setq diff-hl-margin-symbols-alist
+            '((insert . "❙") (delete . "^") (change . "❙")
+              (unknown . "❙") (ignored . "❙")))
+      (diff-hl-margin-mode))))
 
 (use-package git-timemachine
   :bind
@@ -1115,13 +1115,13 @@ detected.")
 
 (use-package doom-themes
   :config
-  (load-theme 'doom-Iosvkem 't)
+  (load-theme 'doom-one 't)
   (doom-themes-treemacs-config)
   (doom-themes-visual-bell-config)
   (doom-themes-org-config))
 
 (use-package fill-column-indicator
-  :hook ((git-commit-setup . kalle/git-fill-column-indicator))
+  :hook (git-commit-setup . kalle/git-fill-column-indicator)
   :preface
   (defun kalle/git-fill-column-indicator ()
     (setq fill-column 72)
