@@ -54,10 +54,7 @@
   (require 'use-package))
 
 (use-package auto-compile
-  :hook (kalle-after-emacs-load . kalle/load-auto-compile)
-  :preface
-  (defun kalle/load-auto-compile ()
-    (require 'auto-compile))
+  :demand t
   :config
   (auto-compile-on-load-mode)
   (auto-compile-on-save-mode)
