@@ -22,7 +22,6 @@
         gc-cons-percentage 0.6))
 
 ;;;; Startup
-
 (progn
   (defvar before-user-init-time (current-time)
     "Value of `current-time' when Emacs begins loading `user-init-file'.")
@@ -35,7 +34,7 @@
   (setq package-enable-at-startup nil)
   (setq inhibit-startup-buffer-menu t)
   (setq inhibit-startup-screen t)
-  (setq inhibit-startup-echo-area-message "locutus")
+  (setq inhibit-startup-echo-area-message "kalle")
   (setq initial-scratch-message "")
 
   (setq load-prefer-newer t))
@@ -743,7 +742,9 @@ used then kill the buffer too."
   :bind ((:map kalle-map)
          ("ta" . global-aggressive-indent-mode))
   :config
-  (add-to-list 'aggressive-indent-excluded-modes 'html-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'html-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'js-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'js2-mode))
 
 (use-package comment-dwim-2
   :bind ("M-;" . comment-dwim-2))
@@ -776,7 +777,7 @@ used then kill the buffer too."
          ("ti" . dtrt-indent-global-mode))
   :preface
   (defvar kalle-detect-indentation-excluded-modes '(fundamental-mode)
-  "A list of major modes in which indentation should be automatically
+    "A list of major modes in which indentation should be automatically
 detected.")
   (defun kalle/detect-indentation ()
     (unless (or (not after-init-time)
@@ -999,7 +1000,7 @@ detected.")
 ;;;; Version-control
 
 (use-package diff-hl
-  :hook (after-init . global-diff-hl-mode)
+  :hook (kalle-after-emacs-load . global-diff-hl-mode)
   :commands (diff-hl-magit-post-refresh diff-hl-dired-mode)
   :bind
   ((:map kalle-map)
@@ -1027,7 +1028,8 @@ detected.")
   :init
   (add-hook 'magit-post-refresh-hook 'diff-hl-magit-post-refresh)
   (add-hook 'dired-mode-hook 'diff-hl-dired-mode)
-
+  ;; Set margin-width before loading diff-hl so the screen dosent jump
+  (unless (display-graphic-p) (setq-default left-margin-width 1))
   :config
   (if (display-graphic-p)
       (progn
