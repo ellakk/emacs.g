@@ -823,6 +823,7 @@ detected.")
   (global-flycheck-mode 1))
 
 (use-package flycheck-posframe
+  :if (display-graphic-p)
   :hook (flycheck-mode . flycheck-posframe-mode)
   :config
   (flycheck-posframe-configure-pretty-defaults))
