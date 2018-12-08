@@ -740,11 +740,13 @@ used then kill the buffer too."
 (use-package aggressive-indent
   :hook (kalle-after-emacs-load . global-aggressive-indent-mode)
   :bind ((:map kalle-map)
-         ("ta" . global-aggressive-indent-mode))
+         ("tA" . global-aggressive-indent-mode)
+         ("ta" . aggressive-indent-mode))
   :config
   (add-to-list 'aggressive-indent-excluded-modes 'html-mode)
   (add-to-list 'aggressive-indent-excluded-modes 'js-mode)
-  (add-to-list 'aggressive-indent-excluded-modes 'js2-mode))
+  (add-to-list 'aggressive-indent-excluded-modes 'js2-mode)
+  (add-to-list 'aggressive-indent-excluded-modes 'lua-mode))
 
 (use-package comment-dwim-2
   :bind ("M-;" . comment-dwim-2))
@@ -1152,7 +1154,10 @@ detected.")
     (vhl/load-extension 'undo-tree)))
 
 (use-package whitespace
-  :defer t
+  :bind
+  ((:map kalle-map)
+   ("tw" . whitespace-mode)
+   ("tW" . global-whitespace-mode))
   :init
   (setq whitespace-display-mappings
         '((tab-mark ?\t [?› ?\t])
