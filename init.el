@@ -1405,6 +1405,14 @@ If optional argument P is present, test this instead of point."
   (define-key tern-mode-keymap (kbd "M-.") nil)
   (define-key tern-mode-keymap (kbd "M-,") nil))
 
+;;;; Lua
+
+(use-package lua-mode
+  :defer t
+  :init
+  (setq lua-indent-level 4
+        lua-indent-string-contents t))
+
 ;;;; Minor languages
 
 (use-package ansible
