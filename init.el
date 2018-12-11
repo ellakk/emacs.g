@@ -1113,8 +1113,8 @@ detected.")
                           (if indent-tabs-mode "⭾" "␣")
                           tab-width)))
     (doom-modeline-def-modeline 'main
-                                '(bar workspace-number window-number evil-state god-state ryo-modal-state matches " " buffer-info remote-host buffer-position " " selection-info)
-                                '(indent-style global input-method buffer-encoding major-mode process vcs flycheck)))
+      '(bar workspace-number window-number evil-state god-state ryo-modal xah-fly-keys matches " " buffer-info remote-host buffer-position " " selection-info)
+      '(indent-style global persp-name lsp minor-modes input-method buffer-encoding major-mode process vcs flycheck)))
   :init
   (setq doom-modeline-height 29))
 
