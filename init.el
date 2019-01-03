@@ -1306,11 +1306,8 @@ detected.")
 (use-package dash
   :hook ((emacs-lisp-mode) . dash-enable-font-lock))
 
-(use-package outline
-  :hook (emacs-lisp-mode . outline-minor-mode))
-
 (use-package outshine
-  :hook (outline-minor-mode . outshine-hook-function))
+  :hook (emacs-lisp-mode . outshine-mode))
 
 ;;;; HTML
 
